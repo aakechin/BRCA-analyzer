@@ -27,7 +27,9 @@ Also, you will need to upload and index hg19 reference genome in the directory r
 ./twoBitToFa ref/hg19.2bit ref/ucsc.hg19.fasta 
 ```
 Then, extract one more archive with human genome parts:
-``` cd ref/ && tar -xf ref/human_g1k_v37_chr13+17.fasta.tar.gz && cd ../```
+```
+cd ref/ && tar -xf ref/human_g1k_v37_chr13+17.fasta.tar.gz && cd ../
+```
 Index and create sequences dictionary for the reference genome:
 ``` 
 bwa index ref/ucsc.hg19.fasta
