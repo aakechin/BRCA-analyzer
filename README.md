@@ -16,15 +16,29 @@ pip3 install argparse numpy python-docx xlrd
 ```
  For using snpEff you will also need hg19 database. To download it use the following command:
 ```
-java -jar snpEff.jar download hg19
+java -jar <path-to-snpEff>/snpEff.jar download hg19
 ```
 For Annovar you will need the following databases: refGene, cosmic70, esp6500siv2_all, exac03, kaviar_20150923, 1000g2015aug_all, avsnp147, clinvar_20160302, ljb26_all. To download them run: 
 ```
-annotate_variation.pl -buildver hg19 -downdb <database name> humandb/
+<path-to-ANNOVAR>/annotate_variation.pl -buildver hg19 -downdb <database name> humandb/
 ```
-Also, you will need to upload and index hg19 reference genome in the directory ref/ of BRCA-analyzer.
+Also, you will need to upload and index hg19 reference genome in the directory ref/ of BRCA-analyzer. Download hg19 refence from http://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit. After that, go the directory with BRCA-analyzer and run tool twoBitToFa from UCSC:
+``` 
+./twoBitToFa ref/hg19.2bit ref/ucsc.hg19.fasta 
+```
+Then, extract one more archive with human genome parts:
+``` cd ref/ && tar -xf ref/human_g1k_v37_chr13+17.fasta.tar.gz && cd ../```
+Index and create sequences dictionary for the reference genome:
+``` 
+bwa index ref/ucsc.hg19.fasta
+java -jar <path-to-picard>/picard.jar CreateSequenceDictionary R=ref/ucsc.hg19.fasta O=ref/ucsc.hg19.dict
+samtoold faidx ref/ucsc.hg19.fasta
+```
 ## Installation
-To install BRCA-analyzer run `python install.py` with paths to external programs as input arguments.
+To install BRCA-analyzer run `python install.py` with paths to external programs as input arguments (written paths are only examples, replace them with yours; 0 for bwa means that it was added to the PATH):
+```
+python install.py -bwa 0 -sam ~/tools/samtools/ -bcf ~/tools/bcftools/ -picard ~/Downloads/picard/dist/ -gatk ~/Downloads/GenomeAnalysis-3.7/ -snpeff ~/tools/snpEff/ -annovar ~/Downloads/ANNOVAR/
+```
 ## Use
 ### Quick start guide
 To run analysis, first, prepare patients table file with the following columns (you can use file from example directory as a template):
@@ -33,16 +47,19 @@ To run analysis, first, prepare patients table file with the following columns (
 * First index – number of first index used for barcoding.
 * Second index – number of the second index used for barcoding.
 
-After that you can run the analysis with the following commands. First, you need to cut primer sequences from reads with another our tool cutPrimers (https://github.com/aakechin/cutPrimers). And then run **BRCA-analyzer**
+After that you can run the analysis with the following commands. If you used amplicon-based library preparation, you need to cut primer sequences from reads with another our tool cutPrimers (https://github.com/aakechin/cutPrimers). In the example/ directory we've already added trimmed read sequences. And then run **BRCA-analyzer**
 ```
-cd example & python3 ../brca_analyzer.py -r1 'reads/*R1*' -r2 'reads/*R2*' --p patients_table.csv -out reads_trimmed_analysis/ -th 3 -tt 2 -run EXAMPLE
+cd example 
+python3 ../brca_analyzer.py -r1 'reads_trimmed/patient_*.r1.ad_trimmed.trimmed.qual_trimmed.fastq.gz' -r2 'reads_trimmed/patient_*.r2.ad_trimmed.trimmed.qual_trimmed.fastq.gz' -rN 'reads/*R1*' --p patients_table.csv -primer primers_coord.xls -out reads_trimmed_analysis/ -th 3 -tt 2 -run EXAMPLE -lang english
 ```
 ### Arguments
 ```
 -h, --help            show this help message and exit
   --readsFiles_r1 READSFILES1, -r1 READSFILES1 regular expression for choosing files with R1 reads
   --readsFiles_r2 READSFILES2, -r2 READSFILES2 regular expression for choosing files with R2 reads (alternative)
+  --readsFiles_N READSFILESN, -rN READSFILESN regular expression for choosing files with native R1 reads (including Undetermined) to evaluate effectivity of trimming reads (alternative). If you do not have trimmed reads, do not use this parameter
   --patientsTable PATIENTSTABLE, -pat PATIENTSTABLE table with information about each patient: ngs_num patient_id barcode1 barcode2
+  --primersCoords PRIMERSCOORDS, -primer PRIMERSCOORDS table with information about amplicon coordinates without column headers: amplicon_number | chromosome | start | end. (Is not required)
   --fixMisencodedQuals, -fix this parameter is needed if GATK shows error of quality encoding
   --outDir OUTDIR, -out OUTDIR directory for output
   --threads THREADS, -th THREADS number of threads
@@ -50,6 +67,7 @@ cd example & python3 ../brca_analyzer.py -r1 'reads/*R1*' -r2 'reads/*R2*' --p p
   --run-name RUNNAME, -run RUNNAME Name of run. This name will be added into the name of the final output file. Default: BRCA
   --without-joinment, -notjoin use this parameter if you only want to process patients reads separately without joining them (useful if you have an opportunity to separate processing onto several machines)
   --only-join, -onlyjoin use this parameter if you only want to join already processed patients reads
+  --language LANG, -lang LANG Language of report and text on figures (russian or english). Default: english
 ```
 ### Opportunity of faster analysis
 If you have several processors (e.g. on the server), each with several cores, you can run the analysis in two steps but several times faster. First, you need to separate all FASTQ-files onto several groups of 4 file pairs (R1 and R2 reads). It can be done with bash-script (if you don't know how, contact me, and I'll send you my script). After that for each group of files you can start the analysis on the different processors with parameter -notjoin that make BRCA-analyzer not to join result files of all samples into one. Second, you need to start analysis with the same parameters, but without -notjoin and with -onlyjoin (as -r1 and -r2 parameters you can choose any group of files). This process can be done on a single processor. But in this case we recommend to create output directory manually in advance.

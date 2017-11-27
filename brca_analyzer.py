@@ -188,7 +188,7 @@ def processPatient(inputArgs):
 par=argparse.ArgumentParser(description='This script do all processing of BRCA sequencing data')
 par.add_argument('--readsFiles_r1','-r1',dest='readsFiles1',type=str,help='regular expression for choosing files with R1 reads',required=True)
 par.add_argument('--readsFiles_r2','-r2',dest='readsFiles2',type=str,help='regular expression for choosing files with R2 reads (optional)',required=False)
-par.add_argument('--readsFiles_N','-rN',dest='readsFilesN',type=str,help='regular expression for choosing files with native R1 reads (including Undetermined) to evaluate effectivity of trimming reads  (alternative). If you have not trimmed reads, do not use this parameter',required=False)
+par.add_argument('--readsFiles_N','-rN',dest='readsFilesN',type=str,help='regular expression for choosing files with native R1 reads (including Undetermined) to evaluate effectivity of trimming reads  (alternative). If you do not have trimmed reads, do not use this parameter',required=False)
 par.add_argument('--patientsTable','-pat',dest='patientsTable',type=str,help='table with information about each patient: ngs_num patient_id barcode1 barcode2',required=True)
 par.add_argument('--primersCoords','-primer',dest='primersCoords',type=str,help='table with information about amplicon coordinates without column headers: amplicon_number | chromosome | start | end. (Is not required)',required=False)
 par.add_argument('--fixMisencodedQuals','-fix',dest='fixMisEncoded',action='store_true',help='this parameter is needed if GATK shows error of quality encoding')
