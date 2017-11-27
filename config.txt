@@ -1,0 +1,6 @@
+
+
+/home/andrey/Downloads/picard-2.0.1/dist/
+/home/andrey/Downloads/GenomeAnalysisTK-3.6/
+/home/andrey/Downloads/snpEff/
+/home/andrey/Downloads/annovar/
