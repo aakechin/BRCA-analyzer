@@ -34,7 +34,7 @@ Index and create sequences dictionary for the reference genome:
 ``` 
 bwa index ref/ucsc.hg19.fasta
 java -jar <path-to-picard>/picard.jar CreateSequenceDictionary R=ref/ucsc.hg19.fasta O=ref/ucsc.hg19.dict
-samtoold faidx ref/ucsc.hg19.fasta
+samtools faidx ref/ucsc.hg19.fasta
 ```
 ## Installation
 To install BRCA-analyzer run `python install.py` with paths to external programs as input arguments (written paths are only examples, replace them with yours; 0 for bwa means that it was added to the PATH):
