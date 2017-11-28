@@ -48,7 +48,9 @@ if args.trimReadsFiles:
     print('Evaluating number of properly trimmed reads...')
     showPercWork(0,allWork)
     for i,d in enumerate(sorted(ds2)):
-        patNum=p2.findall(d)[0]
+        m2=p2.findall(d)
+        if len(m2)==0: patNum=p1.findall(d)[0]
+        else: patNum=m2[0]
         out=sp.check_output('zcat '+d.replace(' ','\ ')+' | wc -l',shell=True,stderr=sp.STDOUT,universal_newlines=True)
         trimmedReadsNum=int(nump.findall(out)[0])
         reads2Num[patNum]=trimmedReadsNum
@@ -65,7 +67,10 @@ if args.trimReadsFiles:
             continue
         else:
             perc=reads2Num[key]/reads1Num[key]
-        rFile.write('\t'.join([key,pats[key][0],pats[key][1],pats[key][2],str(reads1Num[key]),str(reads2Num[key]),str(perc)])+'\n')
+        if key in pats.keys():
+            rFile.write('\t'.join([key,pats[key][0],pats[key][1],pats[key][2],str(reads1Num[key]),str(reads2Num[key]),str(perc)])+'\n')
+        else:
+            rFile.write('\t'.join([key,'empty_'+key,'-','-',str(reads1Num[key]),str(reads2Num[key]),str(perc)])+'\n')
 else:
     rFile.write('\t'.join(['Patient_Num','Patient_ID','Barcode_1','Barcode_2','Total_Reads'])+'\n')
     for key,item in reads1Num.items():
