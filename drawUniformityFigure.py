@@ -37,7 +37,7 @@ covList=[]
 for string in file:
     if 'amplicon#' in string: continue
     cols=string.replace('\n','').split('\t')
-    if 'DEL_' in cols[0] or 'empty' in cols[1]: continue
+    if 'DEL_' in cols[1] or 'empty' in cols[1] or cols[1]=='': continue
     pat=cols[0].replace('patient_','')
     pats.append(pat)
     covs0=list(map(float,cols[5:]))

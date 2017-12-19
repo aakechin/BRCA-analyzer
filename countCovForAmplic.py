@@ -134,7 +134,7 @@ for res in p.imap_unordered(processBamFile,bamFiles,10):
     if bamFilePart[:bamFilePart.index('.')].replace('patient_','') in pats.keys():
         resultFile.write('\t'+'\t'.join(pats[bamFilePart[:bamFilePart.index('.')].replace('patient_','')]))
     else:
-        resultFile.write('\t'*3)
+        resultFile.write('\t'*2)
     resultFile.write('\t'+'\t'.join(covs)+'\n')
     doneWork+=1
     showPercWork(doneWork,allWork)
