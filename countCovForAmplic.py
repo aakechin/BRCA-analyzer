@@ -131,7 +131,10 @@ for res in p.imap_unordered(processBamFile,bamFiles,10):
     bamFile,covs=res
     bamFilePart=bamFile[bamFile.rfind('/')+1:]
     resultFile.write("%s" % (bamFilePart[:bamFilePart.index('.')].replace('patient_','')))
-    resultFile.write('\t'+'\t'.join(pats[bamFilePart[:bamFilePart.index('.')].replace('patient_','')]))
+    if bamFilePart[:bamFilePart.index('.')].replace('patient_','') in pats.keys():
+        resultFile.write('\t'+'\t'.join(pats[bamFilePart[:bamFilePart.index('.')].replace('patient_','')]))
+    else:
+        resultFile.write('\t'*3)
     resultFile.write('\t'+'\t'.join(covs)+'\n')
     doneWork+=1
     showPercWork(doneWork,allWork)
