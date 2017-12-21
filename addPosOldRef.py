@@ -68,8 +68,12 @@ for string in file:
                 pNum=patient.split('_')[1]+'_'+patient.split('_')[2]
         else:
             pNum=patient
-        patIDs.append(pats[pNum][0])
-        barcodes.append(pats[pNum][1])
+        if pNum in pats.keys():
+            patIDs.append(pats[pNum][0])
+            barcodes.append(pats[pNum][1])
+        else:
+            patIDs.append('empty_'+pNum)
+            barcodes.append('')
         refCov,altCov=cov.split(',')
         altTotal=str(round(int(altCov)/(int(refCov)+int(altCov)),2))
         refCovs.append(refCov)

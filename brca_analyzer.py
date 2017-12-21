@@ -202,6 +202,8 @@ par.add_argument('--language','-lang',dest='lang',type=str,help='Language of rep
 args=par.parse_args()
 
 langs=['russian','english']
+if args.lang=='ru': args.lang='russian'
+elif args.lang=='en': args.lang='english'
 if args.lang not in langs:
     print('#'*10,'\nWARNING! Chosen language is not accepted. Use default english...')
 if args.notToJoin and args.onlyJoin:
@@ -312,11 +314,11 @@ if args.notToJoin:
 elif args.onlyJoin:
     ds=glob.glob(outDir+'patient_*/*.unifiedGenotyper.ann.avinput')
     if len(ds)<len(patNums):
-        print('ERROR: Number of files with completely processed reads is less than number of patients!')
+        print('#'*10)
+        print('WARNING: Number of files with completely processed reads is less than number of patients!')
         print('Number of patients:',len(patNums))
-        print('Numner of files with completely processed reads (*.unifiedGenotyper.ann.avinput):',len(ds))
-        print('Try to start analysis again without -onlyjoin')
-        exit(0)
+        print('Number of files with completely processed reads (*.unifiedGenotyper.ann.avinput):',len(ds))
+        print('#'*10)
 # Join mutations of all patients to one file
 print('Joining mutations of all patients...')
 output=sp.check_output("python3 "+thisDir+"joinMutations.py -v '"+outDir+"patient_*/*.unifiedGenotyper.ann.avinput' -o "+outDir+'allPatients.unifiedGenotyper.ann.avinput',shell=True,stderr=sp.STDOUT)
