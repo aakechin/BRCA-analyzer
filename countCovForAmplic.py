@@ -61,7 +61,7 @@ def countCoverage(bamFile,mpileupFile,chrom=17,start=0,end=0,minMean='mean'):
 # Next function creates file mpileup with coverages for each position of BAM-file
 def mpileup(bamFile,resultFile="output.mpileup"):
     output=sp.check_output(configs[1]+"samtools mpileup -Q 0 -d 1000000 -r chr13:32889617-32973809 -t DP -A "+bamFile+" > "+resultFile+'1',shell=True,stderr=sp.STDOUT)
-    output=sp.check_output(configs[1]+"samtools mpileup -Q 0 -d 1000000 -r chr17:41196312-41277500 -t DP -A "+bamFile+" > "+resultFile+'2',shell=True,stderr=sp.STDOUT)
+    output=sp.check_output(configs[1]+"samtools mpileup -Q 0 -d 1000000 -r chr17:41196312-41279700 -t DP -A "+bamFile+" > "+resultFile+'2',shell=True,stderr=sp.STDOUT)
     return resultFile
 
 def processBamFile(bamFile):
@@ -86,6 +86,10 @@ patFileName=sys.argv[3]
 bamFilesSpec=sys.argv[4]
 resultFileName=sys.argv[5]
 threads=sys.argv[6]
+if len(sys.argv)>=8:
+    patNums=sys.argv[7].split('_')
+else:
+    patNums=None 
 
 if minMean not in ['min','mean','max']:
     print('ERROR! The last argument should be "min", "mean" or "max"')
@@ -127,33 +131,20 @@ allWork=len(bamFiles)
 showPercWork(0,allWork)
 p=Pool(threads)
 doneWork=0
+showPercWork(doneWork,allWork)
 for res in p.imap_unordered(processBamFile,bamFiles,10):
     bamFile,covs=res
     bamFilePart=bamFile[bamFile.rfind('/')+1:]
     resultFile.write("%s" % (bamFilePart[:bamFilePart.index('.')].replace('patient_','')))
-    if bamFilePart[:bamFilePart.index('.')].replace('patient_','') in pats.keys():
-        resultFile.write('\t'+'\t'.join(pats[bamFilePart[:bamFilePart.index('.')].replace('patient_','')]))
+    patNum=bamFilePart[:bamFilePart.index('.')].replace('patient_','')
+    if patNum in pats.keys():
+        resultFile.write('\t'+'\t'.join(pats[patNum]))
+    elif patNums and patNum in patNums:
+        resultFile.write('\t'+'\t'.join(pats[str(patNums.index(patNum)+1)]))
     else:
         resultFile.write('\t'*2)
     resultFile.write('\t'+'\t'.join(covs)+'\n')
     doneWork+=1
     showPercWork(doneWork,allWork)
-##for i,bamFile in enumerate(bamFiles):
-##    mpileupFile=bamFile+".mpileup"
-##    mpileup(bamFile,mpileupFile)
-##    bamFilePart=bamFile[bamFile.rfind('/')+1:]
-##    resultFile.write("%s" % (bamFilePart[:bamFilePart.index('.')].replace('patient_','')))
-##    resultFile.write('\t'+'\t'.join(pats[bamFilePart[:bamFilePart.index('.')].replace('patient_','')]))
-##    covs=[]
-##    for k,coord in enumerate(coords):
-##        if coord[0]==13:
-##            cov=round(countCoverage(bamFile,mpileupFile+'1',coord[0],coord[1],coord[2],minMean),3)
-##        elif coord[0]==17:
-##            cov=round(countCoverage(bamFile,mpileupFile+'2',coord[0],coord[1],coord[2],minMean),3)
-##        covs.append(cov)
-##    covLess30=sum(z<30 for z in covs)
-##    covs=list(map(str,[round(median(covs),3),covLess30]+covs))
-##    resultFile.write('\t'+'\t'.join(covs)+'\n')
-##    showPercWork(i+1,allWork)
 resultFile.close()
 print()

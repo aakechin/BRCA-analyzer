@@ -47,6 +47,10 @@ def processPatient(inputArgs):
                                    ' '+readsFile1+' -t '+threads+' | gzip > '+outDir+''
                                    'patient_'+patNum+'/patient_'+patNum+'.sam.gz',
                                    shell=True,stderr=sp.STDOUT)
+        if 'fail to locate the index files' in str(output):
+            print('#'*10,'\nERROR: File with reference sequence was not found!\n'
+                  'It should be:',thisDir+'ref/ucsc.hg19.fasta\n','#'*10)
+            exit(0)
     # Convert SAM-file to BAM
     if not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+'.bam') and not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+'.bam.gz'):
         output=sp.check_output(configs[1]+"samtools view -b "+outDir+'patient_'+patNum+'/patient_'+patNum+'.sam.gz '
@@ -85,7 +89,7 @@ def processPatient(inputArgs):
                                ' -I '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.bam'
                                ' -o '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.intervals'
                                ' -L chr13:32889617-32973809'
-                               ' -L chr17:41196312-41277500'+fixMis+' -nt '+threads,
+                               ' -L chr17:41196312-41279700'+fixMis+' -nt '+threads,
                                shell=True,stderr=sp.STDOUT)
     # Realign
     if not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+''
@@ -98,7 +102,7 @@ def processPatient(inputArgs):
                                ' -o '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.realigned.bam'
                                ' -targetIntervals '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.intervals'
                                ' -L chr13:32889617-32973809'
-                               ' -L chr17:41196312-41277500'+fixMis,
+                               ' -L chr17:41196312-41279700'+fixMis,
                                shell=True,stderr=sp.STDOUT)
     # Recalibration
     if not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+''
@@ -111,7 +115,7 @@ def processPatient(inputArgs):
                                ' -o '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.realigned.recal_data.table'
                                ' -knownSites '+thisDir+'annotation_databases/clinvar_20160831.vcf.gz'
                                ' -L chr13:32889617-32973809'
-                               ' -L chr17:41196312-41277500 -nct '+threads,
+                               ' -L chr17:41196312-41279700 -nct '+threads,
                                shell=True,stderr=sp.STDOUT)
     if not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+''
                           '.sorted.read_groups.realigned.post_recal_data.table') and not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+''
@@ -124,7 +128,7 @@ def processPatient(inputArgs):
                                ' -knownSites '+thisDir+'annotation_databases/clinvar_20160831.vcf.gz'
                                ' -BQSR '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.realigned.recal_data.table'
                                ' -L chr13:32889617-32973809'
-                               ' -L chr17:41196312-41277500 -nct '+threads,
+                               ' -L chr17:41196312-41279700 -nct '+threads,
                                shell=True,stderr=sp.STDOUT)
     if not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+''
                           '.sorted.read_groups.realigned.recal.bam') and not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+''
@@ -136,7 +140,7 @@ def processPatient(inputArgs):
                                ' -o '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.realigned.recal.bam'
                                ' -BQSR '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.realigned.recal_data.table'
                                ' -L chr13:32889617-32973809'
-                               ' -L chr17:41196312-41277500 -nct '+threads,
+                               ' -L chr17:41196312-41279700 -nct '+threads,
                                shell=True,stderr=sp.STDOUT)
     # Call variants
     if not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+''
@@ -152,7 +156,7 @@ def processPatient(inputArgs):
                                ' -minIndelFrac 0.01'
                                ' -mbq 10'
                                ' -L chr13:32889617-32973809'
-                               ' -L chr17:41196312-41277500 -nt '+threads,
+                               ' -L chr17:41196312-41279700 -nt '+threads,
                                shell=True,stderr=sp.STDOUT)
     # Annotate variants
     if not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+''
@@ -227,6 +231,8 @@ if args.readsFilesN:
 patientsTable=args.patientsTable
 if not os.path.exists(patientsTable):
     print('ERROR: patients table file does not exist!'); exit(0)
+else:
+    patientsTable=os.path.abspath(patientsTable)
 if args.primersCoords and not os.path.exists(args.primersCoords):
     print('ERROR: primers coords table file does not exist!'); exit(0)
 outDir=args.outDir
@@ -256,6 +262,20 @@ if not args.onlyJoin:
         text=input()
         if text!='Y' and text!='y':
             exit(0)
+    # Check that file with reference genome sequence exists
+    if not os.path.exists(thisDir+'ref/ucsc.hg19.fasta'):
+        print('#'*10,'\nERROR: File with reference sequence was not found!\n'
+                  'It should be:',thisDir+'ref/ucsc.hg19.fasta\n'+'#'*10)
+        exit(0)
+
+# Check that file with reference sequence for chromosome 13 and 17 exists
+if not os.path.exists(thisDir+'ref/human_g1k_v37_chr13+17.fasta'):
+    if os.path.exists(thisDir+'ref/human_g1k_v37_chr13+17.fasta.tar.gz'):
+        print('#'*10,'\nERROR: You forgot to untar archive with sequences of chromosomes 13 and 17 in the "ref" directory!\n'+'#'*10)
+    else:
+        print('#'*10,'\nERROR: Sequences of chromosomes 13 and 17 is absent in the "ref" directory!\n'
+              'It should look like:',thisDir+'ref/human_g1k_v37_chr13+17.fasta\n'+'#'*10)
+    exit(0)
 
 # Section of procedures
 # reads quality evaluation and cutting primers are distinct processes
@@ -335,7 +355,7 @@ if 'ERROR' in str(output):
 print('Done')
 # Add positions in old references
 print('Adding positions in old references...')
-output=sp.check_output("python3 "+thisDir+"addPosOldRef.py -i "+outDir+'allPatients.unifiedGenotyper.ann.avinput.ann.hg19_multianno.txt -p '+patientsTable,shell=True,stderr=sp.STDOUT)
+output=sp.check_output("python3 "+thisDir+"addPosOldRef.py -in "+outDir+'allPatients.unifiedGenotyper.ann.avinput.ann.hg19_multianno.txt -pt '+patientsTable+' -pl '+'_'.join(patNums),shell=True,stderr=sp.STDOUT)
 if 'ERROR' in str(output):
     print(output.decode('utf-8'))
     exit(0)
@@ -363,7 +383,7 @@ if args.primersCoords:
     process=sp.Popen(["python3",thisDir+"countCovForAmplic.py","min",
                       args.primersCoords,patientsTable,
                       ''+outDir+'patient_*/*.sorted.read_groups.realigned.recal.bam',
-                      outDir+args.runName+'_amplicon_coverage_min.xls',str(t*int(args.toolThreads))],
+                      outDir+args.runName+'_amplicon_coverage_min.xls',str(t*int(args.toolThreads)),'_'.join(patNums)],
                      stdout=sp.PIPE,shell=False,universal_newlines=True)
     for c in iter(process.stdout.readline,''):
         sys.stdout.write("\r"+str(c).replace('\n',''))
@@ -372,7 +392,7 @@ if args.primersCoords:
     process=sp.Popen(["python3",thisDir+"countCovForAmplic.py","mean",
                       args.primersCoords,patientsTable,
                       ''+outDir+'patient_*/*.sorted.read_groups.realigned.recal.bam',
-                      outDir+args.runName+'_amplicon_coverage_mean.xls',str(t*int(args.toolThreads))],
+                      outDir+args.runName+'_amplicon_coverage_mean.xls',str(t*int(args.toolThreads)),'_'.join(patNums)],
                      stdout=sp.PIPE,shell=False,universal_newlines=True)
     for c in iter(process.stdout.readline,''):
         sys.stdout.write("\r"+str(c).replace('\n',''))
@@ -387,19 +407,27 @@ else:
     output=sp.check_output('python3 '+thisDir+'getPercentOfProperlyTrimmedReads.py '
                            '-nat "'+args.readsFiles1+'" -pat '+patientsTable+' -out '+outDir+args.runName+'.reads_statistics.xls',shell=True,stderr=sp.STDOUT)
 print('Done')
-print('Evaluating uniformity of coverage...')
-output=sp.check_output('python3 '+thisDir+'drawUniformityFigure.py '
-                       '-cov '+outDir+args.runName+'_amplicon_coverage_mean.xls '
-                       '-out '+outDir+args.runName+'_amplicon_coverage_mean.uniformity.tiff '
-                       '-lang '+args.lang,shell=True,stderr=sp.STDOUT)
+if args.primersCoords:
+    print('Evaluating uniformity of coverage...')
+    output=sp.check_output('python3 '+thisDir+'drawUniformityFigure.py '
+                           '-cov '+outDir+args.runName+'_amplicon_coverage_mean.xls '
+                           '-out '+outDir+args.runName+'_amplicon_coverage_mean.uniformity.tiff '
+                           '-lang '+args.lang,shell=True,stderr=sp.STDOUT)
 print('Done')
 print('Creating report...')
-output=sp.check_output('python3 '+thisDir+'makeReport.py '
-                        '-read '+outDir+args.runName+'.reads_statistics.xls '
-                       '-cov '+outDir+args.runName+'_amplicon_coverage_mean.xls '
-                       '-res '+outDir+'allPatients.'+args.runName+'.unifiedGenotyper.ann.avinput.ann.hg19_multianno.withOurCoordinates.clinical.excel.xls '
-                       '-fig '+outDir+args.runName+'_amplicon_coverage_mean.uniformity.tiff '
-                       '-out '+outDir+args.runName+'.report.docx '
-                       '-lang '+args.lang,shell=True,stderr=sp.STDOUT)
+if args.primersCoords:
+    output=sp.check_output('python3 '+thisDir+'makeReport.py '
+                            '-read '+outDir+args.runName+'.reads_statistics.xls '
+                           '-cov '+outDir+args.runName+'_amplicon_coverage_mean.xls '
+                           '-res '+outDir+'allPatients.'+args.runName+'.unifiedGenotyper.ann.avinput.ann.hg19_multianno.withOurCoordinates.clinical.excel.xls '
+                           '-fig '+outDir+args.runName+'_amplicon_coverage_mean.uniformity.tiff '
+                           '-out '+outDir+args.runName+'.report.docx '
+                           '-lang '+args.lang,shell=True,stderr=sp.STDOUT)
+else:
+    output=sp.check_output('python3 '+thisDir+'makeReport.py '
+                            '-read '+outDir+args.runName+'.reads_statistics.xls '
+                           '-res '+outDir+'allPatients.'+args.runName+'.unifiedGenotyper.ann.avinput.ann.hg19_multianno.withOurCoordinates.clinical.excel.xls '
+                           '-out '+outDir+args.runName+'.report.docx '
+                           '-lang '+args.lang,shell=True,stderr=sp.STDOUT)
 print('Done')
 

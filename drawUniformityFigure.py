@@ -41,11 +41,14 @@ for string in file:
     pat=cols[0].replace('patient_','')
     pats.append(pat)
     covs0=list(map(float,cols[5:]))
+    print(covs0)
     covs=[]
     for i,cov in enumerate(covs0):
         covs.append(cov)
     covList.append(covs)
 data=np.array(covList)
+print(data)
+print(data.shape)
 maxi,maxj=data.shape
 meanAmplCovs=[]
 cvs=[]
@@ -74,5 +77,5 @@ plt.title('Coverage Uniformity',fontsize=16,fontweight='bold')
 ax1.legend(bbox_to_anchor=(0., 0.95, 1., .10),loc=3,fontsize=16)
 ax2.legend(bbox_to_anchor=(0., 0.95, 1., .10),loc=4,fontsize=16)
 plt.tight_layout()
-plt.savefig(args.outFile)
+plt.savefig(args.outFile,bbox_inches='tight')
 plt.close()

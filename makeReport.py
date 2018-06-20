@@ -193,14 +193,14 @@ for string in file:
         continue
     if string=='' or string=='\n': break
     cols=string.replace('\n','').split('\t')
-    allTotalReads.append(int(cols[4]))
+    allTotalReads.append(int(float(cols[4])))
     if 'Undetermined' in cols[0]:
         continue
-    indexed.append(int(cols[4]))
+    indexed.append(int(float(cols[4])))
     if 'empty' in cols[1]:
-        empty.append(int(cols[4]))
+        empty.append(int(float(cols[4])))
     else:
-        allNotEmpty.append(int(cols[4]))
+        allNotEmpty.append(int(float(cols[4])))
         if trimPrimerStat:
             trimmedReadsPerc.append(float(cols[6]))
             if float(cols[6])<0.50:
@@ -216,22 +216,23 @@ elif 50<=percIndexed<80: lowIndexedReads=lang['LowIndexedReads2']; lowIndexedRea
 # Empty indexes
 percEmpty=round(sum(empty)*100/sum(allTotalReads),2)
 highEmpty=''; highEmptyColor=RGBColor(255,255,255)
-if max(empty)>min(allNotEmpty):
+if len(empty)>0 and max(empty)>min(allNotEmpty):
     highEmpty=lang['HighEmpty']; highEmptyColor=RGBColor(255,0,0)
 # Trimming reads stat
-medianTrimmedRead=round(stat.median(trimmedReadsPerc)*100,1)
-minTrimmedRead=round(min(trimmedReadsPerc)*100,1); maxTrimmedRead=round(max(trimmedReadsPerc)*100,1)
-lowMedianTrimmedReads=''; lowMedianTrimmedReadsColor=RGBColor(255,255,255)
-if medianTrimmedRead<50: lowMedianTrimmedReads=lang['LowMedianTrimmedReads1']; lowMedianTrimmedReadsColor=RGBColor(255,0,0)
-elif 50<=percIndexed<80: lowMedianTrimmedReads=lang['LowMedianTrimmedReads2']; lowMedianTrimmedReadsColor=RGBColor(255,78,0)
-tooLowTrimmedReadsWarn=''; tooLowTrimmedReadsWarnColor=RGBColor(255,255,255)
-if tooLowTrimmedReads>0:
-    tooLowTrimmedReadsWarn=lang['WarningFor']+str(tooLowTrimmedReads)+lang['TooLowTrimmedReadsWarn1']
-    tooLowTrimmedReadsWarnColor=RGBColor(255,0,0)
-lowTrimmedReadsWarn=''; lowTrimmedReadsWarnColor=RGBColor(255,255,255)
-if lowTrimmedReads>0:
-    lowTrimmedReadsWarn=lang['WarningFor']+str(lowTrimmedReads)+lang['TooLowTrimmedReadsWarn2']
-    lowTrimmedReadsWarnColor=RGBColor(255,78,0)
+if len(trimmedReadsPerc)>0:
+    medianTrimmedRead=round(stat.median(trimmedReadsPerc)*100,1)
+    minTrimmedRead=round(min(trimmedReadsPerc)*100,1); maxTrimmedRead=round(max(trimmedReadsPerc)*100,1)
+    lowMedianTrimmedReads=''; lowMedianTrimmedReadsColor=RGBColor(255,255,255)
+    if medianTrimmedRead<50: lowMedianTrimmedReads=lang['LowMedianTrimmedReads1']; lowMedianTrimmedReadsColor=RGBColor(255,0,0)
+    elif 50<=percIndexed<80: lowMedianTrimmedReads=lang['LowMedianTrimmedReads2']; lowMedianTrimmedReadsColor=RGBColor(255,78,0)
+    tooLowTrimmedReadsWarn=''; tooLowTrimmedReadsWarnColor=RGBColor(255,255,255)
+    if tooLowTrimmedReads>0:
+        tooLowTrimmedReadsWarn=lang['WarningFor']+str(tooLowTrimmedReads)+lang['TooLowTrimmedReadsWarn1']
+        tooLowTrimmedReadsWarnColor=RGBColor(255,0,0)
+    lowTrimmedReadsWarn=''; lowTrimmedReadsWarnColor=RGBColor(255,255,255)
+    if lowTrimmedReads>0:
+        lowTrimmedReadsWarn=lang['WarningFor']+str(lowTrimmedReads)+lang['TooLowTrimmedReadsWarn2']
+        lowTrimmedReadsWarnColor=RGBColor(255,78,0)
 # Coverage
 file=open(args.covStatFile)
 medCovs=[]
