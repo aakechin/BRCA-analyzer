@@ -3,7 +3,6 @@
 ## Dependency
 BRCA-analyzer needs the following external tools:
 * **samtools** (version >= 1.2) (download it from https://github.com/samtools/samtools/releases);
-* **bcftools** (version >= 1.2) (download it from https://github.com/samtools/bcftools/releases);
 * **bwa** (version >= 0.7.10) (download it from https://sourceforge.net/projects/bio-bwa/files/);
 * **picard** (version >= 2.0.1) (download it from https://broadinstitute.github.io/picard/);
 * **GenomeAnalysisToolKit** (version=3.6 or 3.7) (download it from https://software.broadinstitute.org/gatk/download/);
