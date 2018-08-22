@@ -188,9 +188,19 @@ for string in file:
             i5+=1
         # Write unknown
         elif ((newCols[19]=='.' or float(newCols[19])<0.005) and newCols[25]!='no' and clinVarSign==3 and len(patNums)<5
-              and newCols[9]!='synonymous_variant'):
-            wsUnknown.write_row(i6,0,newCols[0:2],f1)
-            wsUnknown.write_row(i6,2,newCols[2:],f2)
-            i6+=1
+              and newCols[9]!='synonymous_variant' and newCols[9]!='downstream_gene_variant' and newCols[9]!='upstream_gene_variant'):
+            # If it is an intron variant, then we check if it is not more than 50 nucleotides before 3'-end of intron
+            ## 50 nucleotidesm of 3'-end of intron is a possible polypirimidine tract
+            intronVarPat=re.compile('c.\d+\-(\d+)')
+            if newCols[9]=='intron_variant':
+                intronVarMatches=intronVarPat.findall(newCols[13])
+                if len(intronVarMatches)>0 and int(intronVarMatches[0])<=50:
+                    wsUnknown.write_row(i6,0,newCols[0:2],f1)
+                    wsUnknown.write_row(i6,2,newCols[2:],f2)
+                    i6+=1
+            else:
+                wsUnknown.write_row(i6,0,newCols[0:2],f1)
+                wsUnknown.write_row(i6,2,newCols[2:],f2)
+                i6+=1
 wb.close()
 file.close()
