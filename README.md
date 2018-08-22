@@ -21,7 +21,7 @@ For Annovar you will need the following databases: refGene, cosmic70, esp6500siv
 ```
 <path-to-ANNOVAR>/annotate_variation.pl -buildver hg19 -downdb <database name> humandb/
 ```
-Also, you will need to upload and index hg19 reference genome in the directory ref/ of BRCA-analyzer. Download hg19 refence from http://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit. After that, go the directory with BRCA-analyzer and run tool twoBitToFa from UCSC:
+Also, you will need to upload and index hg19 reference genome in the directory ref/ of BRCA-analyzer. Download hg19 reference from http://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit. After that, go the directory with BRCA-analyzer and run tool twoBitToFa from UCSC (http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/twoBitToFa):
 ``` 
 ./twoBitToFa ref/hg19.2bit ref/ucsc.hg19.fasta 
 ```
