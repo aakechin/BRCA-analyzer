@@ -51,25 +51,25 @@ def processPatient(inputArgs):
             print('#'*10,'\nERROR: File with reference sequence was not found!\n'
                   'It should be:',thisDir+'ref/ucsc.hg19.fasta\n','#'*10)
             exit(0)
-    # Convert SAM-file to BAM
-    if not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+'.bam') and not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+'.bam.gz'):
-        output=sp.check_output(configs[1]+"samtools view -b "+outDir+'patient_'+patNum+'/patient_'+patNum+'.sam.gz '
-                               '-o '+outDir+'patient_'+patNum+'/patient_'+patNum+'.bam'
-                               ' -@ '+str(int(threads)-1),
-                               shell=True,stderr=sp.STDOUT)
-    # Sort BAM-file
-    if not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.bam') and not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.bam.gz'):
-        output=sp.check_output(configs[1]+"samtools sort -T /tmp/aln_"+patNum+".sorted "
-                               "-o "+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.bam'
-                               ' '+outDir+'patient_'+patNum+'/patient_'+patNum+'.bam'
-                               ' -@ '+str(int(threads)-1),
-                               shell=True,stderr=sp.STDOUT)
+##    # Convert SAM-file to BAM
+##    if not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+'.bam') and not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+'.bam.gz'):
+##        output=sp.check_output(configs[1]+"samtools view -b "+outDir+'patient_'+patNum+'/patient_'+patNum+'.sam.gz '
+##                               '-o '+outDir+'patient_'+patNum+'/patient_'+patNum+'.bam'
+##                               ' -@ '+str(int(threads)-1),
+##                               shell=True,stderr=sp.STDOUT)
+##    # Sort BAM-file
+##    if not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.bam') and not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.bam.gz'):
+##        output=sp.check_output(configs[1]+"samtools sort -T /tmp/aln_"+patNum+".sorted "
+##                               "-o "+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.bam'
+##                               ' '+outDir+'patient_'+patNum+'/patient_'+patNum+'.bam'
+##                               ' -@ '+str(int(threads)-1),
+##                               shell=True,stderr=sp.STDOUT)
     # Add read groups
     if not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+''
                           '.sorted.read_groups.bam') and not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+''
                           '.sorted.read_groups.bam.gz'):
         output=sp.check_output("java -jar "+configs[2]+"picard.jar "
-                               "AddOrReplaceReadGroups INPUT="+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.bam'
+                               "AddOrReplaceReadGroups INPUT="+outDir+'patient_'+patNum+'/patient_'+patNum+'.sam.gz'
                                ' OUTPUT='+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.bam'
                                ' SORT_ORDER=coordinate RGLB=MiSeq RGPL=Illumina RGPU=barcode RGSM=patient_'+patNum,
                                shell=True,stderr=sp.STDOUT)
@@ -226,8 +226,6 @@ if args.readsFilesN:
     readsFilesN=sorted(glob.glob(args.readsFilesN))
     if len(readsFilesN)==0:
         print('ERROR: no files for native reads were selected!'); exit(0)
-##    if not (0<=len(readsFilesN)-len(readsFiles1)<=1):
-##        print('ERROR: number of files with native R1 reads should be equal to or be one more than the number of files with trimmed R1 reads '); exit(0)
 patientsTable=args.patientsTable
 if not os.path.exists(patientsTable):
     print('ERROR: patients table file does not exist!'); exit(0)
@@ -235,6 +233,8 @@ else:
     patientsTable=os.path.abspath(patientsTable)
 if args.primersCoords and not os.path.exists(args.primersCoords):
     print('ERROR: primers coords table file does not exist!'); exit(0)
+elif not args.primersCoords:
+    args.primersCoords=thisDir+'primers_coords_default.csv'
 outDir=args.outDir
 if outDir[-1]!='/': outDir+='/'
 # Create output directory
