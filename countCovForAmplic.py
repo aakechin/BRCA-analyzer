@@ -10,11 +10,8 @@
 # [threads]
 
 
-import os
-import glob
-import sys
+import os,glob,sys,re,argparse
 import subprocess as sp
-import re
 from statistics import mean
 from statistics import median
 from multiprocessing import Pool
@@ -78,21 +75,32 @@ def processBamFile(bamFile):
     covs=list(map(str,[round(median(covs),3),covLess30]+covs))
     return(bamFile,covs)
 
+# Readign arguments
+par=argparse.ArgumentParser(description="This script evaluates coverage of amplicons")
+par.add_argument('--min-mean-max','-mmm',dest='minMeanMax',type=str,help='min, mean or max values should be outputed by the program for each amplicon. Default: mean',required=False,default='mean')
+par.add_argument('--file-with-coordinates','-coord',dest='coordsFileName',type=str,help='TSV-file with coordinates for each amplicon: amplicon_name | chromosome | start | end',required=True)
+par.add_argument('--pateints-file','-pat',dest='patFileName',type=str,help='TSV-file with information about each sample: sample_number | sample ID | index1| index2',required=False)
+par.add_argument('--bam-files','-bam',dest='bamFilesSpec',type=str,help='regular expression for BAM-files',required=True)
+par.add_argument('--result-file-name','-res',dest='resultFileName',type=str,help='name for file with results',required=True)
+par.add_argument('--patientsList','-pl',dest='patientsList',type=str,help='list of sample numbers that correspond IDs of files with reads (BRCA-alayzer send it to this tool automatically)',required=False)
+par.add_argument('--threads','-th',dest='threads',type=int,help='number of threads',default=2)
+args=par.parse_args()
+
 # Make file with coordinates
 # Read file with primers
-minMean=sys.argv[1]
-coordsFileName=sys.argv[2]
-patFileName=sys.argv[3]
-bamFilesSpec=sys.argv[4]
-resultFileName=sys.argv[5]
-threads=sys.argv[6]
-if len(sys.argv)>=8:
-    patNums=sys.argv[7].split('_')
+minMean=args.minMeanMax
+coordsFileName=args.coordsFileName
+patFileName=args.patFileName
+bamFilesSpec=args.bamFilesSpec
+resultFileName=args.resultFileName
+threads=args.threads
+if args.patientsList:
+    patNums=args.patientsList.split('_')
 else:
     patNums=None 
 
 if minMean not in ['min','mean','max']:
-    print('ERROR! The last argument should be "min", "mean" or "max"')
+    print('ERROR! The argument -mmm (--min-mean-max) should be "min", "mean" or "max"')
     exit(0)
 bamFiles=glob.glob(bamFilesSpec)
 if len(bamFiles)==0:
@@ -115,12 +123,16 @@ for string in file:
     coords.append([int(cols[1].replace('chr','')),int(cols[2]),int(cols[3])])
 
 # Read file with patients table
-pFile=open(sys.argv[3])
 pats={}
-for string in pFile:
-    cols=string[:-1].split('\t')
-    pats[cols[0]]=[cols[1],cols[2]+'_'+cols[3]]
-pFile.close()
+if patFileName:
+    pFile=open(patFileName)
+    for string in pFile:
+        cols=string[:-1].split('\t')
+        pats[cols[0]]=[cols[1],cols[2]+'_'+cols[3]]
+    pFile.close()
+else:
+    for pat in patNums:
+        pats[pat]=['N/A','N/A_N/A']
 
 resultFile=open(resultFileName,'w')
 resultFile.write("Patient#\tPatient_ID\tBarcodes\tMedian_Coverage\tNumber_<30")

@@ -20,35 +20,39 @@ def showPercWork(done,allWork):
 # Readign arguments
 par=argparse.ArgumentParser(description="This script adds position of mutation in Uljana's reference")
 par.add_argument('--inputFile','-in',dest='inputFile',type=str,help='file with variations',required=True)
-par.add_argument('--patientsTable','-pt',dest='patientsTable',type=str,help='table with information about each patient: ngs_num patient_id barcode1 barcode2',required=True)
+par.add_argument('--patientsTable','-pt',dest='patientsTable',type=str,help='table with information about each patient: ngs_num patient_id barcode1 barcode2',required=False)
 par.add_argument('--patientsList','-pl',dest='patientsList',type=str,help='list of sample numbers that correspond IDs of files with reads (BRCA-alayzer send it to this tool automatically)',required=False)
 par.add_argument('--torrent','-ion',dest='ion_torrent',action='store_true',help='this parameter is needed if you join variants that were called by Torrent Suite Variant Caller')
 args=par.parse_args()
 
 file=open(args.inputFile)
-try:
-    pFile=open(args.patientsTable,'r')
-except:
-    print('ERROR: Patient table file was not found!')
-    exit(0)
+if args.patientsTable:
+    try:
+        pFile=open(args.patientsTable,'r')
+    except:
+        print('ERROR: Patient table file was not found!')
+        exit(0)
 resultFile=open(args.inputFile[:-4]+'.withOurCoordinates.xls','w')
 ion_torrent=args.ion_torrent
-pats={}
-try:
-    for string in pFile:
-        cols=string.replace('\n','').split('\t')
-        pats[cols[0]]=[cols[1],cols[2]+'_'+cols[3]]
-except:
-    e=sys.exc_info()[0]
-    print('ERROR: Some problems with reading patient table file!')
-    print(e)
-    exit(0)
-pFile.close()
-
 if args.patientsList:
     patList=args.patientsList.split('_')
 else:
     patList=None
+pats={}
+if args.patientsTable:
+    try:
+        for string in pFile:
+            cols=string.replace('\n','').split('\t')
+            pats[cols[0]]=[cols[1],cols[2]+'_'+cols[3]]
+    except:
+        e=sys.exc_info()[0]
+        print('ERROR: Some problems with reading patient table file!')
+        print(e)
+        exit(0)
+    pFile.close()
+else:
+    for pat in patList:
+        pats[pat]=['N/A','N/A_N/A']
     
 for string in file:
     if 'Chr\tStart' in string:
