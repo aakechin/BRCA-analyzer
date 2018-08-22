@@ -46,7 +46,7 @@ for i,d in enumerate(sorted(ds1)):
     reads1Num[patNum]=totalReadsNum/2
     showPercWork(i+1,allWork)
 filesPatNums=sorted(filesPatNums)
-print(pats)
+##print(reads1Num)
 print()
 if args.trimReadsFiles:
     allWork=len(ds2)
@@ -92,5 +92,6 @@ else:
                 print("WARNING: Patients' numbers in patients table do not correspond numbers in the file\n"
                       'So the program will take this sample without patient ID')
                 rFile.write('\t'.join([key,'','','',str(reads1Num[key])])+'\n')
-         
+        else:
+             rFile.write('\t'.join([key,pats[key][0],pats[key][1],pats[key][2],str(reads1Num[key])])+'\n')
 rFile.close()
