@@ -340,89 +340,89 @@ elif args.onlyJoin:
         print('Number of patients:',len(patNums))
         print('Number of files with completely processed reads (*.unifiedGenotyper.ann.avinput):',len(ds))
         print('#'*10)
-### Join mutations of all patients to one file
-##print('Joining mutations of all patients...')
-##output=sp.check_output("python3 "+thisDir+"joinMutations.py -v '"+outDir+"patient_*/*.unifiedGenotyper.ann.avinput' -o "+outDir+'allPatients.unifiedGenotyper.ann.avinput',shell=True,stderr=sp.STDOUT)
-##if 'ERROR' in str(output):
-##    print(output.decode('utf-8'))
-##    exit(0)
-##print('Done')
-### Annotate them with ANNOVAR
-##print('Annotating mutations of all patients with ANNOVAR...')
-##output=sp.check_output(configs[5]+"table_annovar.pl "+outDir+'allPatients.unifiedGenotyper.ann.avinput '+configs[5]+'humandb/ -buildver hg19 -out '+outDir+'allPatients.unifiedGenotyper.ann.avinput.ann -remove -protocol refGene,cosmic70,esp6500siv2_all,exac03,kaviar_20150923,1000g2015aug_all,avsnp147,clinvar_20170905,ljb26_all -operation g,f,f,f,f,f,f,f,f -nastring . -otherinfo',shell=True,stderr=sp.STDOUT)
-##if 'ERROR' in str(output):
-##    print(output.decode('utf-8'))
-##    exit(0)
-##print('Done')
-### Add positions in old references
-##print('Adding positions in old references...')
-##if args.patientsTable:
-##    output=sp.check_output("python3 "+thisDir+"addPosOldRef.py -in "+outDir+'allPatients.unifiedGenotyper.ann.avinput.ann.hg19_multianno.txt -pt '+patientsTable+' -pl '+'_'.join(patNums),shell=True,stderr=sp.STDOUT)
-##else:
-##    output=sp.check_output("python3 "+thisDir+"addPosOldRef.py -in "+outDir+'allPatients.unifiedGenotyper.ann.avinput.ann.hg19_multianno.txt -pl '+'_'.join(patNums),shell=True,stderr=sp.STDOUT)
-##if 'ERROR' in str(output):
-##    print(output.decode('utf-8'))
-##    exit(0)
-##print('Done')
-### Annotate by Clinical information
-##print('Annotating with BIC...')
-##output=sp.check_output("python3 "+thisDir+"annotateClinVars.py -i "+outDir+'allPatients.unifiedGenotyper.ann.avinput.ann.hg19_multianno.withOurCoordinates.xls',shell=True,stderr=sp.STDOUT)
-##if 'ERROR' in str(output):
-##    print(output.decode('utf-8'))
-##    exit(0)
-##print('Done')
-### Convert to Excel-format
-##print('Converting to Excel-format...')
-##output=sp.check_output("python3 "+thisDir+"convertResultToExcel.py"
-##                       ' -i '+outDir+'allPatients.unifiedGenotyper.ann.avinput.ann.hg19_multianno.withOurCoordinates.clinical.xls'
-##                       ' -o '+outDir+'allPatients.'+args.runName+'.unifiedGenotyper.ann.avinput.ann.hg19_multianno.withOurCoordinates.clinical.excel.xls',
-##                       shell=True,stderr=sp.STDOUT)
-##if 'ERROR' in str(output):
-##    print(output.decode('utf-8'))
-##    exit(0)
-##print('Done')
-##if args.patientsTable:
-##    # Evaluating coverage
-##    print('Evaluating coverage...')
-##    process=sp.Popen(["python3",thisDir+"countCovForAmplic.py","-mmm","min",
-##                      '-coord',args.primersCoords,'-pat',patientsTable,'-bam',
-##                      ''+outDir+'patient_*/*.sorted.read_groups.realigned.recal.bam','-res',
-##                      outDir+args.runName+'_amplicon_coverage_min.xls','-th',str(t*int(args.toolThreads)),'-pl','_'.join(patNums)],
-##                     stdout=sp.PIPE,shell=False,universal_newlines=True)
-##    for c in iter(process.stdout.readline,''):
-##        sys.stdout.write("\r"+str(c).replace('\n',''))
-##        sys.stdout.flush()
-##    print()
-##    process=sp.Popen(["python3",thisDir+"countCovForAmplic.py","-mmm","mean",
-##                      '-coord',args.primersCoords,'-pat',patientsTable,'-bam',
-##                      ''+outDir+'patient_*/*.sorted.read_groups.realigned.recal.bam','-res',
-##                      outDir+args.runName+'_amplicon_coverage_mean.xls','-th',str(t*int(args.toolThreads)),'-pl','_'.join(patNums)],
-##                     stdout=sp.PIPE,shell=False,universal_newlines=True)
-##    for c in iter(process.stdout.readline,''):
-##        sys.stdout.write("\r"+str(c).replace('\n',''))
-##        sys.stdout.flush()
-##    print()
-##else:
-##    # Evaluating coverage
-##    print('Evaluating coverage...')
-##    process=sp.Popen(["python3",thisDir+"countCovForAmplic.py","-mmm","min",
-##                      '-coord',args.primersCoords,'-bam',
-##                      ''+outDir+'patient_*/*.sorted.read_groups.realigned.recal.bam','-res',
-##                      outDir+args.runName+'_amplicon_coverage_min.xls','-th',str(t*int(args.toolThreads)),'-pl','_'.join(patNums)],
-##                     stdout=sp.PIPE,shell=False,universal_newlines=True)
-##    for c in iter(process.stdout.readline,''):
-##        sys.stdout.write("\r"+str(c).replace('\n',''))
-##        sys.stdout.flush()
-##    print()
-##    process=sp.Popen(["python3",thisDir+"countCovForAmplic.py","-mmm","mean",
-##                      '-coord',args.primersCoords,'-bam',
-##                      ''+outDir+'patient_*/*.sorted.read_groups.realigned.recal.bam','-res',
-##                      outDir+args.runName+'_amplicon_coverage_mean.xls','-th',str(t*int(args.toolThreads)),'-pl','_'.join(patNums)],
-##                     stdout=sp.PIPE,shell=False,universal_newlines=True)
-##    for c in iter(process.stdout.readline,''):
-##        sys.stdout.write("\r"+str(c).replace('\n',''))
-##        sys.stdout.flush()
-##    print()
+# Join mutations of all patients to one file
+print('Joining mutations of all patients...')
+output=sp.check_output("python3 "+thisDir+"joinMutations.py -v '"+outDir+"patient_*/*.unifiedGenotyper.ann.avinput' -o "+outDir+'allPatients.unifiedGenotyper.ann.avinput',shell=True,stderr=sp.STDOUT)
+if 'ERROR' in str(output):
+    print(output.decode('utf-8'))
+    exit(0)
+print('Done')
+# Annotate them with ANNOVAR
+print('Annotating mutations of all patients with ANNOVAR...')
+output=sp.check_output(configs[5]+"table_annovar.pl "+outDir+'allPatients.unifiedGenotyper.ann.avinput '+configs[5]+'humandb/ -buildver hg19 -out '+outDir+'allPatients.unifiedGenotyper.ann.avinput.ann -remove -protocol refGene,cosmic70,esp6500siv2_all,exac03,kaviar_20150923,1000g2015aug_all,avsnp150,clinvar_20180603,ljb26_all -operation g,f,f,f,f,f,f,f,f -nastring . -otherinfo',shell=True,stderr=sp.STDOUT)
+if 'ERROR' in str(output):
+    print(output.decode('utf-8'))
+    exit(0)
+print('Done')
+# Add positions in old references
+print('Adding positions in old references...')
+if args.patientsTable:
+    output=sp.check_output("python3 "+thisDir+"addPosOldRef.py -in "+outDir+'allPatients.unifiedGenotyper.ann.avinput.ann.hg19_multianno.txt -pt '+patientsTable+' -pl '+'_'.join(patNums),shell=True,stderr=sp.STDOUT)
+else:
+    output=sp.check_output("python3 "+thisDir+"addPosOldRef.py -in "+outDir+'allPatients.unifiedGenotyper.ann.avinput.ann.hg19_multianno.txt -pl '+'_'.join(patNums),shell=True,stderr=sp.STDOUT)
+if 'ERROR' in str(output):
+    print(output.decode('utf-8'))
+    exit(0)
+print('Done')
+# Annotate by Clinical information
+print('Annotating with BIC...')
+output=sp.check_output("python3 "+thisDir+"annotateClinVars.py -i "+outDir+'allPatients.unifiedGenotyper.ann.avinput.ann.hg19_multianno.withOurCoordinates.xls',shell=True,stderr=sp.STDOUT)
+if 'ERROR' in str(output):
+    print(output.decode('utf-8'))
+    exit(0)
+print('Done')
+# Convert to Excel-format
+print('Converting to Excel-format...')
+output=sp.check_output("python3 "+thisDir+"convertResultToExcel.py"
+                       ' -i '+outDir+'allPatients.unifiedGenotyper.ann.avinput.ann.hg19_multianno.withOurCoordinates.clinical.xls'
+                       ' -o '+outDir+'allPatients.'+args.runName+'.unifiedGenotyper.ann.avinput.ann.hg19_multianno.withOurCoordinates.clinical.excel.xls',
+                       shell=True,stderr=sp.STDOUT)
+if 'ERROR' in str(output):
+    print(output.decode('utf-8'))
+    exit(0)
+print('Done')
+if args.patientsTable:
+    # Evaluating coverage
+    print('Evaluating coverage...')
+    process=sp.Popen(["python3",thisDir+"countCovForAmplic.py","-mmm","min",
+                      '-coord',args.primersCoords,'-pat',patientsTable,'-bam',
+                      ''+outDir+'patient_*/*.sorted.read_groups.realigned.recal.bam','-res',
+                      outDir+args.runName+'_amplicon_coverage_min.xls','-th',str(t*int(args.toolThreads)),'-pl','_'.join(patNums)],
+                     stdout=sp.PIPE,shell=False,universal_newlines=True)
+    for c in iter(process.stdout.readline,''):
+        sys.stdout.write("\r"+str(c).replace('\n',''))
+        sys.stdout.flush()
+    print()
+    process=sp.Popen(["python3",thisDir+"countCovForAmplic.py","-mmm","mean",
+                      '-coord',args.primersCoords,'-pat',patientsTable,'-bam',
+                      ''+outDir+'patient_*/*.sorted.read_groups.realigned.recal.bam','-res',
+                      outDir+args.runName+'_amplicon_coverage_mean.xls','-th',str(t*int(args.toolThreads)),'-pl','_'.join(patNums)],
+                     stdout=sp.PIPE,shell=False,universal_newlines=True)
+    for c in iter(process.stdout.readline,''):
+        sys.stdout.write("\r"+str(c).replace('\n',''))
+        sys.stdout.flush()
+    print()
+else:
+    # Evaluating coverage
+    print('Evaluating coverage...')
+    process=sp.Popen(["python3",thisDir+"countCovForAmplic.py","-mmm","min",
+                      '-coord',args.primersCoords,'-bam',
+                      ''+outDir+'patient_*/*.sorted.read_groups.realigned.recal.bam','-res',
+                      outDir+args.runName+'_amplicon_coverage_min.xls','-th',str(t*int(args.toolThreads)),'-pl','_'.join(patNums)],
+                     stdout=sp.PIPE,shell=False,universal_newlines=True)
+    for c in iter(process.stdout.readline,''):
+        sys.stdout.write("\r"+str(c).replace('\n',''))
+        sys.stdout.flush()
+    print()
+    process=sp.Popen(["python3",thisDir+"countCovForAmplic.py","-mmm","mean",
+                      '-coord',args.primersCoords,'-bam',
+                      ''+outDir+'patient_*/*.sorted.read_groups.realigned.recal.bam','-res',
+                      outDir+args.runName+'_amplicon_coverage_mean.xls','-th',str(t*int(args.toolThreads)),'-pl','_'.join(patNums)],
+                     stdout=sp.PIPE,shell=False,universal_newlines=True)
+    for c in iter(process.stdout.readline,''):
+        sys.stdout.write("\r"+str(c).replace('\n',''))
+        sys.stdout.flush()
+    print()
 # Evaluate read statistics
 print('Evaluating reads...')
 if args.readsFilesN:

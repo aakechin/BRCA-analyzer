@@ -17,7 +17,7 @@ pip3 install argparse numpy python-docx xlrd
 ```
 java -jar <path-to-snpEff>/snpEff.jar download hg19
 ```
-For Annovar you will need the following databases: refGene, cosmic70, esp6500siv2_all, exac03, kaviar_20150923, 1000g2015aug_all, avsnp147, clinvar_20160302, ljb26_all. To download them run: 
+For Annovar you will need the following databases: refGene, cosmic70, esp6500siv2_all, exac03, kaviar_20150923, 1000g2015aug_all, avsnp150, clinvar_20180603, ljb26_all. To download them run for each database: 
 ```
 <path-to-ANNOVAR>/annotate_variation.pl -buildver hg19 -downdb <database name> humandb/
 ```
