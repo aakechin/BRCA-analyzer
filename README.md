@@ -11,7 +11,7 @@ BRCA-analyzer needs the following external tools:
 
 Also BRCA-analyzer needs **Python** (version >= 3) and several external modules “argparse” for reading input arguments, "numpy" for working with arrays, "python-docx" for creating report, "xlrd" for reading EXCEL-tables. To install them, run the following command:
 ```
-pip3 install argparse numpy python-docx xlrd python3-biopython
+pip3 install argparse numpy python-docx xlrd biopython xlsxwriter
 ```
  For using snpEff you will also need hg19 database. To download it use the following command:
 ```
