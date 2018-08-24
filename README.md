@@ -19,7 +19,7 @@ java -jar <path-to-snpEff>/snpEff.jar download hg19
 ```
 For Annovar you will need the following databases: refGene, cosmic70, esp6500siv2_all, exac03, kaviar_20150923, 1000g2015aug_all, avsnp150, clinvar_20180603, ljb26_all. To download them run for each database: 
 ```
-<path-to-ANNOVAR>/annotate_variation.pl -buildver hg19 -downdb <database name> humandb/
+<path-to-ANNOVAR>/annotate_variation.pl -buildver hg19 -downdb -webfrom annovar <database name> humandb/
 ```
 Also, you will need to upload and index hg19 reference genome in the directory ref/ of BRCA-analyzer. Download hg19 reference from http://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit. After that, go the directory with BRCA-analyzer and run tool twoBitToFa from UCSC (http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/twoBitToFa). twoBitToFa is included into BRCA-analyzer, so it can be started by:
 ``` 
@@ -42,7 +42,7 @@ python install.py -bwa 0 -sam ~/tools/samtools/ -bcf ~/tools/bcftools/ -picard ~
 ```
 ## Use
 ### Quick start guide
-To run analysis, first, prepare patients table file with the following columns (you can use file from example directory as a template):
+To run analysis, first, you can prepare patients table file (it is not necessary) with the following columns (you can use file from example directory as a template):
 * Sample number – this number should correspond the number from file with reads. For example, if FASTQ-file has name “3_S3_L001_R1_001.fastq.gz”, the sample should has number 3.
 * Sample ID – this ID will be added to the result file. It can be some IDs that your laboratory use for incoming samples.
 * First index – number of first index used for barcoding.
@@ -51,7 +51,7 @@ To run analysis, first, prepare patients table file with the following columns (
 After that you can run the analysis with the following commands. If you used amplicon-based library preparation, you need to cut primer sequences from reads with another our tool cutPrimers (https://github.com/aakechin/cutPrimers). In the example/ directory we've already added trimmed read sequences. And then run **BRCA-analyzer**
 ```
 cd example 
-python3 ../brca_analyzer.py -r1 'reads_trimmed/patient_*.r1.ad_trimmed.trimmed.qual_trimmed.fastq.gz' -r2 'reads_trimmed/patient_*.r2.ad_trimmed.trimmed.qual_trimmed.fastq.gz' -rN 'reads/*R1*' --p patients_table.csv -primer primers_coord.xls -out reads_trimmed_analysis/ -th 3 -tt 2 -run EXAMPLE -lang english
+python3 ../brca_analyzer.py -r1 'reads_trimmed/patient_*.r1.ad_trimmed.trimmed.qual_trimmed.fastq.gz' -r2 'reads_trimmed/patient_*.r2.ad_trimmed.trimmed.qual_trimmed.fastq.gz' -rN 'reads/*R1*' -out reads_trimmed_analysis/ -th 3 -tt 2 -run EXAMPLE -lang english
 ```
 ### Arguments
 ```
