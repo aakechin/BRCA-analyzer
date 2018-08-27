@@ -9,9 +9,9 @@ BRCA-analyzer needs the following external tools:
 * **snpEff** (download it from http://snpeff.sourceforge.net/download.html);
 * **Annovar** (download it from http://annovar.openbioinformatics.org/en/latest/user-guide/download/);
 
-Also BRCA-analyzer needs **Python** (version >= 3) and several external modules “argparse” for reading input arguments, "numpy" for working with arrays, "python-docx" for creating report, "xlrd" for reading EXCEL-tables. To install them, run the following command:
+Also BRCA-analyzer needs **Python** (version >= 3) and several external modules “argparse” for reading input arguments, "numpy" for working with arrays, "python-docx" for creating report, "xlrd" for reading EXCEL-tables, "xlsxwriter" for creating EXCEL-tables, and "matplotlib" for drawing graphs. To install them, run the following command:
 ```
-pip3 install argparse numpy python-docx xlrd biopython xlsxwriter
+pip3 install argparse numpy python-docx xlrd biopython xlsxwriter matplotlib
 ```
  For using snpEff you will also need hg19 database. To download it use the following command:
 ```

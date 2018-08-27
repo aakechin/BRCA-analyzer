@@ -83,7 +83,7 @@ brca2Domains={'PALB2':[1,40],'PCAF':[290,453],'NPM1':[639,1000],'BRC1':[1002,103
               'BRC5':[1664,1696],'BRC6':[1837,1870],'BRC7':[1972,2004],'BRC8':[2051,2084],'POLH':[1338,1781],'HMG20b':[1648,2190],'FANCD2':[2350,2545],
               'helix':[2479,2667],'DSS1':[2481,2832],'NES':[2682,2698],'OB1':[2682,2794],'OB2':[2804,3054],'OB3':[3073,3167],'NLS1':[3263,3269],
               'NLS2':[3381,3385],'Phosph1':[755,755],'Phosph2':[3291,3291],'Phosph3':[3387,3387],'BubR1':[3189,3418]}
-clinVarSignToNums={'Benign':1,'Likely benign':2,'Uncertain significance':3,'other':3,'.':3,'not provided':3,'Likely pathogenic':4,'Pathogenic':5}
+clinVarSignToNums={'Benign':1,'Likely_benign':2,'Conflicting_interpretations_of_pathogenicity':3,'Uncertain_significance':3,'other':3,'.':3,'not_provided':3,'Likely_pathogenic':4,'Pathogenic':5}
 i1=0; i2=0; i3=0; i4=0; i5=0; i6=0
 pp=re.compile('\d+')
 for string in file:
@@ -150,7 +150,12 @@ for string in file:
     for clin in clinVarSigns:
         clins=clin.split(',')
         for cl in clins:
-            clinVarSum.append(clinVarSignToNums[cl])
+            try:
+                clinVarSum.append(clinVarSignToNums[cl])
+            except KeyError:
+                print('ERROR!',clin)
+                print(string)
+                exit(0)
     clinVarSign=int(round(sum(clinVarSum)/len(clinVarSum),0))
     for patNum,patId,barcode,qual,covRef,covAlt,altTotal in zip(patNums,patIds,barcodes,quals,covRefs,covAlts,altTotals):
         newCols[0]=patNum; newCols[1]=patId; newCols[2]=barcode; newCols[8]=qual

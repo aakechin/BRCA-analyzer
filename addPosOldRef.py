@@ -126,7 +126,7 @@ for string in file:
     newCols=[cols[55],'|'.join(patIDs),'|'.join(barcodes),cols[0],cols[59],
              str(inURef),cols[60],cols[61],cols[56],anns[1],':'.join([anns[3],anns[6],anns[8],anns[9],anns[10]]),
              '|'.join(refCovs),'|'.join(altCovs),'|'.join(altTotals),cols[23],cols[12],
-             cols[11],cols[20],cols[24],cols[25],cols[10],
+             cols[11],cols[20],cols[24],cols[29],cols[10],
              cols[31],cols[33],cols[35],
              cols[37],cols[39],cols[41],
              cols[43],cols[45],cols[47]]
