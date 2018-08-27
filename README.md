@@ -1,5 +1,8 @@
 # BRCA-analyzer
 **BRCA-analyzer** is an automatic **workflow** for an analysis of **BRCA1/2** genes **NGS** data. It has been developed and tested on the reads from MiSeq of more than 900 samples. All found pathogenic variations were confirmed by Sanger's sequencing.
+## Docker use
+BRCA-analyzer can be run as a Docker (www.docker.com) image. In this way you only need to install Docker (https://docs.docker.com/install/) and download image of BRCA-analyzer:
+
 ## Dependency
 BRCA-analyzer needs the following external tools:
 * **samtools** (version >= 1.2) (download it from https://github.com/samtools/samtools/releases);
