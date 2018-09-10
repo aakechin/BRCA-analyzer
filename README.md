@@ -21,8 +21,13 @@ cd brca_analyzer/example
 python3 ../brca_analyzer.py -r1 'reads_trimmed/patient_*.r1.ad_trimmed.trimmed.qual_trimmed.fastq.gz' -r2 'reads_trimmed/patient_*.r2.ad_trimmed.trimmed.qual_trimmed.fastq.gz' -rN 'reads/*R1*' -out reads_trimmed_analysis/ -th 3 -tt 2 -run EXAMPLE -lang english
 ```
 For uploading files to a container, you can use the following commands in other terminal:
-```docker ps -a ``` - to know, what is your container's name. It will be written in the last column
-```docker cp <file or directory that you want to copy to the container> <container name>/<folder where you want to put your files>```
+```
+docker ps -a
+```
+to know, what is your container's name. It will be written in the last column.
+```
+docker cp <file or directory that you want to copy to the container> <container name>/<folder where you want to put your files>
+```
 And then you can run analysis with command like above.
 
 ## Dependency
