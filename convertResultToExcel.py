@@ -148,7 +148,7 @@ for string in file:
     clinVarSigns=newCols[27].split('|')
     clinVarSum=[]
     for clin in clinVarSigns:
-        clins=clin.split(',')
+        clins=clin.split('/')
         for cl in clins:
             try:
                 clinVarSum.append(clinVarSignToNums[cl])
