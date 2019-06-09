@@ -35,12 +35,12 @@ def processPatient(inputArgs):
         and not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+'.bam')
         and not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+'.bam.gz')):
         if readsFile2:
-            output=sp.check_output(configs[0]+"bwa mem "+thisDir+'ref/ucsc.hg19.fasta'
+            output=sp.check_output(configs[0]+"bwa mem "+configs[7]+''
                                    ' '+readsFile1+' '+readsFile2+' -t '+threads+' | gzip > '+outDir+''
                                    'patient_'+patNum+'/patient_'+patNum+'.sam.gz',
                                    shell=True,stderr=sp.STDOUT)
         else:
-            output=sp.check_output(configs[0]+"bwa mem "+thisDir+'ref/ucsc.hg19.fasta'
+            output=sp.check_output(configs[0]+"bwa mem "+configs[7]+''
                                    ' '+readsFile1+' -t '+threads+' | gzip > '+outDir+''
                                    'patient_'+patNum+'/patient_'+patNum+'.sam.gz',
                                    shell=True,stderr=sp.STDOUT)
@@ -70,7 +70,7 @@ def processPatient(inputArgs):
                           '.sorted.read_groups.intervals.gz'):
         output=sp.check_output("java -jar "+configs[3]+"GenomeAnalysisTK.jar"
                                ' -T RealignerTargetCreator'
-                               ' -R '+thisDir+'ref/ucsc.hg19.fasta'
+                               ' -R '+configs[7]+''
                                ' -I '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.bam'
                                ' -o '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.intervals'
                                ' -L chr13:32889617-32973809'
@@ -82,7 +82,7 @@ def processPatient(inputArgs):
                           '.sorted.read_groups.realigned.bam.gz'):
         output=sp.check_output("java -jar "+configs[3]+"GenomeAnalysisTK.jar"
                                ' -T IndelRealigner'
-                               ' -R '+thisDir+'ref/ucsc.hg19.fasta'
+                               ' -R '+configs[7]+''
                                ' -I '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.bam'
                                ' -o '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.realigned.bam'
                                ' -targetIntervals '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.intervals'
@@ -95,7 +95,7 @@ def processPatient(inputArgs):
                           '.sorted.read_groups.realigned.recal_data.table.gz'):
         output=sp.check_output("java -jar "+configs[3]+"/GenomeAnalysisTK.jar"
                                ' -T BaseRecalibrator'
-                               ' -R '+thisDir+'ref/ucsc.hg19.fasta'
+                               ' -R '+configs[7]+''
                                ' -I '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.realigned.bam'
                                ' -o '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.realigned.recal_data.table'
                                ' -knownSites '+thisDir+'annotation_databases/clinvar_20160831.vcf.gz'
@@ -107,7 +107,7 @@ def processPatient(inputArgs):
                           '.sorted.read_groups.realigned.post_recal_data.table.gz'):
         output=sp.check_output("java -jar "+configs[3]+"GenomeAnalysisTK.jar"
                                ' -T BaseRecalibrator'
-                               ' -R '+thisDir+'ref/ucsc.hg19.fasta'
+                               ' -R '+configs[7]+''
                                ' -I '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.realigned.bam'
                                ' -o '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.realigned.post_recal_data.table'
                                ' -knownSites '+thisDir+'annotation_databases/clinvar_20160831.vcf.gz'
@@ -120,7 +120,7 @@ def processPatient(inputArgs):
                           '.sorted.read_groups.realigned.recal.bam.gz'):
         output=sp.check_output("java -jar "+configs[3]+"GenomeAnalysisTK.jar"
                                ' -T PrintReads'
-                               ' -R '+thisDir+'ref/ucsc.hg19.fasta'
+                               ' -R '+configs[7]+''
                                ' -I '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.realigned.bam'
                                ' -o '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.realigned.recal.bam'
                                ' -BQSR '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.realigned.recal_data.table'
@@ -160,7 +160,7 @@ def processPatient(inputArgs):
                               '.sorted.read_groups.realigned.recal.'+cutPrimers+'unifiedGenotyper.vcf') and not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+''
                               '.sorted.read_groups.realigned.recal.'+cutPrimers+'unifiedGenotyper.vcf.gz'):
             cmd=["java -jar "+configs[3]+"GenomeAnalysisTK.jar",
-                 ' -T UnifiedGenotyper',' -R '+thisDir+'ref/ucsc.hg19.fasta',
+                 ' -T UnifiedGenotyper',' -R '+configs[7],
                  ' -I '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.realigned.recal.'+cutPrimers+'bam',
                  ' -o '+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.realigned.recal.'+cutPrimers+'unifiedGenotyper.vcf',
                  ' -dfrac 1',' -glm BOTH',' -minIndelFrac 0.01',' -mbq 10',' -L chr13:32889617-32973809',
@@ -171,7 +171,7 @@ def processPatient(inputArgs):
                               '.sorted.read_groups.realigned.recal.'+cutPrimers+'freebayes.vcf') and not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+''
                               '.sorted.read_groups.realigned.recal.'+cutPrimers+'freebayes.vcf.gz'):
             cmd=["/home/andrey/Downloads/freebayes/bin/freebayes",
-                 ' -f '+thisDir+'ref/ucsc.hg19.fasta',
+                 ' -f '+configs[7],
                  '-p 4','-0','-F 0.01','-k',
                  '-r chr13:32889617-32973809','-r chr17:41196312-41279700']
             cmd.append(outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.realigned.recal.'+cutPrimers+'bam')
@@ -332,7 +332,7 @@ if not args.onlyJoin:
         if text!='Y' and text!='y':
             exit(1)
     # Check that file with reference genome sequence exists
-    if not os.path.exists(thisDir+'ref/ucsc.hg19.fasta'):
+    if not os.path.exists(configs[7]):
         print('#'*10,'\nERROR: File with reference sequence was not found!\n'
                   'It should be:',thisDir+'ref/ucsc.hg19.fasta\n'+'#'*10)
         exit(1)
