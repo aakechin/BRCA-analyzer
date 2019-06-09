@@ -2,6 +2,33 @@
 **BRCA-analyzer** is an automatic **workflow** for an analysis of **BRCA1/2** genes **NGS** data. It has been developed and tested on the reads from MiSeq of more than 900 samples. All found pathogenic variations were confirmed by Sanger's sequencing.
 ## Docker use
 BRCA-analyzer can be run as a Docker (www.docker.com) image. In this way you only need to install Docker (https://docs.docker.com/install/) and download image of BRCA-analyzer:
+```
+docker pull aakechin/brca-analyzer
+
+```
+After that, run downloaded image:
+```
+docker run -it --entrypoint 'bash' aakechin/brca-analyzer
+```
+You will be in the main image dorectory, where you can find folders with all necessary programs: brca_analyzer, annovar, snpEff etc. First of all, you need to unzip ANNOVAR databases and reference human genoome (they are very large, so it will take some time):
+```
+gunzip annovar/humandb/*.gz
+gunzip brca_analyzer/ref/*.gz
+```
+Now, you can try to start example analysis or upload to the container (that you've obtained from the image) your FASTQ-files:
+```
+cd brca_analyzer/example 
+python3 ../brca_analyzer.py -r1 'reads_trimmed/patient_*.r1.ad_trimmed.trimmed.qual_trimmed.fastq.gz' -r2 'reads_trimmed/patient_*.r2.ad_trimmed.trimmed.qual_trimmed.fastq.gz' -rN 'reads/*R1*' -out reads_trimmed_analysis/ -th 3 -tt 2 -run EXAMPLE -lang english
+```
+For uploading files to a container, you can use the following commands in other terminal:
+```
+docker ps -a
+```
+to know, what is your container's name. It will be written in the last column.
+```
+docker cp <file or directory that you want to copy to the container> <container name>/<folder where you want to put your files>
+```
+And then you can run analysis with command like above.
 
 ## Dependency
 BRCA-analyzer needs the following external tools:
