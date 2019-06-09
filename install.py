@@ -13,6 +13,7 @@ par.add_argument('--picard','-picard',dest='picardDir',type=str,help='destinatio
 par.add_argument('--gatk','-gatk',dest='gatkDir',type=str,help='destination of GenomeAnalysisTK.jar (version 3.6). For example, ~/GenomeAnalysisTK-3.6/',required=True)
 par.add_argument('--snpeff','-snpeff',dest='snpeffDir',type=str,help='destination of snpEff.jar. For example, ~/snpEff/',required=True)
 par.add_argument('--annovar','-annovar',dest='annovarDir',type=str,help='destination of annovar. For example, ~/annovar/',required=True)
+par.add_argument('--cutprimers','-cutprimers',dest='cutprimersDir',type=str,help='destination of cutPrimers. For example, ~/cutPrimers/. It is not required. But if you are going to trim primer sequences from BAM-file, we recommend to use it',required=False)
 args=par.parse_args()
 
 if args.bwaDir=='0':
@@ -35,8 +36,10 @@ if args.snpeffDir[-1]!='/':
     args.snpeffDir+='/'
 if args.annovarDir[-1]!='/':
     args.annovarDir+='/'
+if args.cutprimersDir and args.cutprimersDir[-1]!='/':
+    args.cutprimersDir+='/'
 
 file=open(thisDir+'config.txt','w')
 ##file.write('\n'.join([args.bwaDir,args.samDir,args.bcfDir,args.picardDir,args.gatkDir,args.snpeffDir,args.annovarDir]))
-file.write('\n'.join([args.bwaDir,args.samDir,args.picardDir,args.gatkDir,args.snpeffDir,args.annovarDir]))
+file.write('\n'.join([args.bwaDir,args.samDir,args.picardDir,args.gatkDir,args.snpeffDir,args.annovarDir,args.cutprimersDir]))
 file.close()

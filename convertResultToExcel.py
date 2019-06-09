@@ -17,10 +17,10 @@ import xlsxwriter as xls
 import os
 
 # Sections of parameters
-QUAL_FILTER2=500
-QUAL_FILTER1=1200
+QUAL_FILTER2=20
+QUAL_FILTER1=100
 ALT_PERC_FILTER1=0.14
-ALT_PERC_FILTER2=0.14
+ALT_PERC_FILTER2=0.05
 
 # Section of functions
 def showPercWork(done,allWork):
@@ -37,6 +37,84 @@ def convertAminoAcid(aa1):
         print(aa1)
         exit(0)
     return(aas[aa1])
+
+def getStrandBiasAndNucsQuality(bam,chrom,start,end,refAllele,altAllele):
+    nucs={}
+    quals=[]
+    for pc in bam.pileup(region=str(chrom)+':'+str(start)+'-'+str(end)):
+        if pc.pos<start:
+            continue
+        if pc.pos>start:
+            break
+        for pr in pc.pileups:
+            rev=pr.alignment.is_reverse
+            if pr.indel<0:
+                mutDel='del'+str(abs(pr.indel))
+                if mutDel not in nucs.keys():
+                    if rev:
+                        nucs[mutDel]={'-':1,'+':0}
+                    else:
+                        nucs[mutDel]={'-':0,'+':1}
+                else:
+                    if rev:
+                        nucs[mutDel]['-']+=1
+                    else:
+                        nucs[mutDel]['+']+=1
+                continue
+            # If there is insertion after this position
+            elif pr.indel>0:
+                mutIns='ins'+str(abs(pr.indel))
+                if mutIns not in nucs.keys():
+                    if rev:
+                        nucs[mutIns]={'-':1,'+':0}
+                    else:
+                        nucs[mutIns]={'-':0,'+':1}
+                else:
+                    if rev:
+                        nucs[mutIns]['-']+=1
+                    else:
+                        nucs[mutIns]['+']+=1
+                continue
+            elif pr.is_refskip or pr.is_del:
+                continue
+            nuc=pr.alignment.query_sequence[pr.query_position]
+            qual=pr.alignment.query_qualities[pr.query_position]
+            if nuc==altAllele:
+                quals.append(qual)
+            if nuc not in nucs.keys():
+                if rev:
+                    nucs[nuc]={'-':1,'+':0}
+                else:
+                    nucs[nuc]={'+':1,'-':0}
+            else:
+                if rev:
+                    nucs[nuc]['-']+=1
+                else:
+                    nucs[nuc]['+']+=1
+    if altAllele not in nucs.keys():
+        return('.','.')
+    table=[]
+    if refAllele not in nucs.keys():
+        table.append([0,0])
+    else:
+        table.append([])
+        table[-1].append(nucs[refAllele]['+'])
+        table[-1].append(nucs[refAllele]['-'])
+    table.append([])
+    table[-1].append(nucs[altAllele]['+'])
+    table[-1].append(nucs[altAllele]['-'])
+    oddsRatio,pValue=stats.fisher_exact(table)
+    if len(quals)==0:
+        quals.append(0)
+    return(pValue,stat.median(quals))
+
+def writeExcelRow(wsw,i,j,row,f=None):
+    for k,val in enumerate(row):
+        try:
+            val=float(val)
+            wsw.write_number(i,j+k,val,f)
+        except ValueError:
+            wsw.write(i,j+k,val,f)
     
 # Section of reading arguments
 par=argparse.ArgumentParser(description='This script coverts output to Excel-format')
@@ -47,22 +125,17 @@ args=par.parse_args()
 thisDir=os.path.dirname(os.path.realpath(__file__))+'/'
 wb=xls.Workbook(args.outFile)
 
-### Read file with coordinates for Sanger primers
-##coordsFile=open(thisDir+'annotation_databases/brca_sanger_sequencing_primers_coords.xls')
-##primersCoords={'17':{},'13':{}}
-##for string in coordsFile:
-##    cols=string[:-1].split('\t')
-##    primersCoords[cols[1]][cols[0]]=[int(cols[2]),int(cols[3])]
-
 # List of SNPs that were already written
 file=open(args.inputFile)
 checked=[]
 wsAll=wb.add_worksheet('All')
 wsFiltered=wb.add_worksheet('All_filtered')
 wsUnknown=wb.add_worksheet('Unknown')
-wsPathogenic=wb.add_worksheet('Pathogenic')
-wsPathogenicFiltered=wb.add_worksheet('Pathogenic_filtered')
-wsPredictedPathogenic=wb.add_worksheet('Predicted_pathogenic')
+wsUnknownFiltered=wb.add_worksheet('Unknown_filtered')
+wsPathogenic=wb.add_worksheet('Clinically_significant')
+wsPathogenicFiltered=wb.add_worksheet('Clinically_significant_filtered')
+wsPredictedPathogenic=wb.add_worksheet('Predicted_clin_significant')
+wsDrugResponse=wb.add_worksheet('Drug_response')
 # We will filter found variants by the following parameters:
 # Alt/total >= 0.14
 # For frameshift QUAL >= 2000; for substitutions - QUAL >= 500
@@ -83,9 +156,16 @@ brca2Domains={'PALB2':[1,40],'PCAF':[290,453],'NPM1':[639,1000],'BRC1':[1002,103
               'BRC5':[1664,1696],'BRC6':[1837,1870],'BRC7':[1972,2004],'BRC8':[2051,2084],'POLH':[1338,1781],'HMG20b':[1648,2190],'FANCD2':[2350,2545],
               'helix':[2479,2667],'DSS1':[2481,2832],'NES':[2682,2698],'OB1':[2682,2794],'OB2':[2804,3054],'OB3':[3073,3167],'NLS1':[3263,3269],
               'NLS2':[3381,3385],'Phosph1':[755,755],'Phosph2':[3291,3291],'Phosph3':[3387,3387],'BubR1':[3189,3418]}
-clinVarSignToNums={'Benign':1,'Likely_benign':2,'Conflicting_interpretations_of_pathogenicity':3,'Uncertain_significance':3,'other':3,'.':3,'not_provided':3,'Likely_pathogenic':4,'Pathogenic':5}
-i1=0; i2=0; i3=0; i4=0; i5=0; i6=0
+clinVarSignToNums={'Benign':1,'Likely_benign':2,'Conflicting_interpretations_of_pathogenicity':3,
+                   'Uncertain_significance':3,'other':3,'_other':3,'.':3,'not_provided':3,'drug_response':3,
+                   '_drug_response':3,'Likely_pathogenic':4,'Pathogenic':5,'risk_factor':5,'protective':5,
+                   'association':3,'_risk_factor':5,'_protective':5,'Affects':5,'affects':5,'_Affects':5,
+                   '_affects':5}
+i1=0; i2=0; i3=0; i4=0; i5=0; i6=0; i7=0; i8=0
 pp=re.compile('\d+')
+wholeWork=len(open(args.inputFile).readlines())
+done=0
+showPercWork(done,wholeWork)
 for string in file:
     cols=string[:-1].split('\t')
     if 'Chrom\tPosition' in string:
@@ -95,16 +175,22 @@ for string in file:
             wsAll.set_column(k,k,colsWidth[k])
             wsFiltered.set_column(k,k,colsWidth[k])
             wsUnknown.set_column(k,k,colsWidth[k])
+            wsUnknownFiltered.set_column(k,k,colsWidth[k])
             wsPathogenic.set_column(k,k,colsWidth[k])
             wsPathogenicFiltered.set_column(k,k,colsWidth[k])
             wsPredictedPathogenic.set_column(k,k,colsWidth[k])
+            wsDrugResponse.set_column(k,k,colsWidth[k])
         wsAll.write_row(0,0,newCols,f0)
         wsFiltered.write_row(0,0,newCols,f0)
         wsUnknown.write_row(0,0,newCols,f0)
+        wsUnknownFiltered.write_row(0,0,newCols,f0)
         wsPathogenic.write_row(0,0,newCols,f0)
         wsPathogenicFiltered.write_row(0,0,newCols,f0)
         wsPredictedPathogenic.write_row(0,0,newCols,f0)
-        i1+=1; i2+=1; i3+=1; i4+=1; i5+=1; i6+=1
+        wsDrugResponse.write_row(0,0,newCols,f0)
+        i1+=1; i2+=1; i3+=1; i4+=1; i5+=1; i6+=1; i7+=1; i8+=1
+        done+=1
+        showPercWork(done,wholeWork)
         continue
     transcriptCheck=False
     # Annotate mutations that influence on the protein sequence by domain
@@ -154,6 +240,9 @@ for string in file:
                 clinVarSum.append(clinVarSignToNums[cl])
             except KeyError:
                 print('ERROR!',clin)
+                print(clins)
+                print(clinVarSignToNums)
+                print(cl in clinVarSignToNums.keys())
                 print(string)
                 exit(0)
     clinVarSign=int(round(sum(clinVarSum)/len(clinVarSum),0))
@@ -161,26 +250,26 @@ for string in file:
         newCols[0]=patNum; newCols[1]=patId; newCols[2]=barcode; newCols[8]=qual
         newCols[16]=covRef; newCols[17]=covAlt; newCols[18]=altTotal
         # Write all variants to worksheet "All"
-        wsAll.write_row(i1,0,newCols[0:2],f1)
-        wsAll.write_row(i1,2,newCols[2:],f2)
+        writeExcelRow(wsAll,i1,0,newCols[0:2],f1)
+        writeExcelRow(wsAll,i1,2,newCols[2:],f2)
         i1+=1
     ##    print(newCols[9],newCols[8],newCols[18],newCols[19],newCols[21],newCols[24])
         # Write all filtered
         if float(newCols[18])>=ALT_PERC_FILTER1 or ((float(newCols[18])>=ALT_PERC_FILTER2) and float(newCols[8])>=QUAL_FILTER2) or float(newCols[8])>=QUAL_FILTER1:
-            wsFiltered.write_row(i2,0,newCols[0:2],f1)
-            wsFiltered.write_row(i2,2,newCols[2:],f2)
+            writeExcelRow(wsFiltered,i2,0,newCols[0:2],f1)
+            writeExcelRow(wsFiltered,i2,2,newCols[2:],f2)
             i2+=1
         # Write pathogenic
         if ((('frameshift_variant' in newCols[9] or 'stop_gained' in newCols[9] or 'stop_lost' in newCols[9]
             or 'start_lost' in newCols[9] or 'splice_acceptor_variant' in newCols[9]
             or 'splice_donor_variant' in newCols[9]) and newCols[25]!='no' and clinVarSign>=3) or newCols[25]=='yes' or clinVarSign>=4):
-            wsPathogenic.write_row(i3,0,newCols[0:2],f1)
-            wsPathogenic.write_row(i3,2,newCols[2:],f2)
+            writeExcelRow(wsPathogenic,i3,0,newCols[0:2],f1)
+            writeExcelRow(wsPathogenic,i3,2,newCols[2:],f2)
             i3+=1
             # Write pathogenic filtered
             if float(newCols[18])>=ALT_PERC_FILTER1 or ((float(newCols[18])>=ALT_PERC_FILTER2) and float(newCols[8])>=QUAL_FILTER2) or float(newCols[8])>=QUAL_FILTER1:
-                wsPathogenicFiltered.write_row(i4,0,newCols[0:2],f1)
-                wsPathogenicFiltered.write_row(i4,2,newCols[2:],f2)
+                writeExcelRow(wsPathogenicFiltered,i4,0,newCols[0:2],f1)
+                writeExcelRow(wsPathogenicFiltered,i4,2,newCols[2:],f2)
                 i4+=1
         # Write predicted pathogenic filtered
         # Low frequency in 1000Genomes, ExAc, ESP6500 and Kaviar, it's not Benign by ClinVar and BIC
@@ -188,8 +277,8 @@ for string in file:
         elif (cols[24]=='D' and (cols[25]=='D' or cols[25]=='P') and (cols[26]=='D' or cols[26]=='P') and cols[27]=='D' and (cols[28]=='A' or cols[28]=='D')
               and (cols[29]=='H' or cols[29]=='M') and cols[30:]==['D','D','D']
               and (cols[20]=='' or cols[20]=='unknown') and clinVarSign>=3):
-            wsPredictedPathogenic.write_row(i5,0,newCols[0:2],f1)
-            wsPredictedPathogenic.write_row(i5,2,newCols[2:],f2)
+            writeExcelRow(wsPredictedPathogenic,i5,0,newCols[0:2],f1)
+            writeExcelRow(wsPredictedPathogenic,i5,2,newCols[2:],f2)
             i5+=1
         # Write unknown
         elif ((newCols[19]=='.' or float(newCols[19])<0.005) and newCols[25]!='no' and clinVarSign==3 and len(patNums)<5
@@ -200,12 +289,27 @@ for string in file:
             if newCols[9]=='intron_variant':
                 intronVarMatches=intronVarPat.findall(newCols[13])
                 if len(intronVarMatches)>0 and int(intronVarMatches[0])<=50:
-                    wsUnknown.write_row(i6,0,newCols[0:2],f1)
-                    wsUnknown.write_row(i6,2,newCols[2:],f2)
+                    writeExcelRow(wsUnknown,i6,0,newCols[0:2],f1)
+                    writeExcelRow(wsUnknown,i6,2,newCols[2:],f2)
                     i6+=1
+                    if float(newCols[18])>=ALT_PERC_FILTER1 or ((float(newCols[18])>=ALT_PERC_FILTER2) and float(newCols[8])>=QUAL_FILTER2) or float(newCols[8])>=QUAL_FILTER1:
+                        writeExcelRow(wsUnknownFiltered,i7,0,newCols[0:2],f1)
+                        writeExcelRow(wsUnknownFiltered,i7,2,newCols[2:],f2)
+                        i7+=1 
             else:
-                wsUnknown.write_row(i6,0,newCols[0:2],f1)
-                wsUnknown.write_row(i6,2,newCols[2:],f2)
+                writeExcelRow(wsUnknown,i6,0,newCols[0:2],f1)
+                writeExcelRow(wsUnknown,i6,2,newCols[2:],f2)
                 i6+=1
+                if float(newCols[18])>=ALT_PERC_FILTER1 or ((float(newCols[18])>=ALT_PERC_FILTER2) and float(newCols[8])>=QUAL_FILTER2) or float(newCols[8])>=QUAL_FILTER1:
+                    writeExcelRow(wsUnknownFiltered,i7,0,newCols[0:2],f1)
+                    writeExcelRow(wsUnknownFiltered,i7,2,newCols[2:],f2)
+                    i7+=1
+        # Write drug response
+        if 'drug_response' in clinVarSigns:
+            writeExcelRow(wsDrugResponse,i8,0,newCols[0:2],f1)
+            writeExcelRow(wsDrugResponse,i8,2,newCols[2:],f2)
+            i8+=1
+    done+=1
+    showPercWork(done,wholeWork)
 wb.close()
 file.close()

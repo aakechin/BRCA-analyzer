@@ -4,3 +4,4 @@
 /home/andrey/Downloads/GenomeAnalysisTK-3.6/
 /home/andrey/Downloads/snpEff/
 /home/andrey/Downloads/annovar/
+/home/andrey/projects/brca_analyzer_v0.9/cutPrimers/

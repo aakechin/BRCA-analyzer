@@ -97,8 +97,9 @@ for string in file:
         else:
             patIDs.append('empty_'+pNum)
             barcodes.append('')
-        refCov,altCov=cov.split(',')
-        altTotal=str(round(int(altCov)/(int(refCov)+int(altCov)),2))
+        totalCov,altCov=cov.split(',')
+        refCov=str(int(totalCov)-int(altCov))
+        altTotal=str(round(int(altCov)/int(totalCov),2))
         refCovs.append(refCov)
         altCovs.append(altCov)
         altTotals.append(altTotal)

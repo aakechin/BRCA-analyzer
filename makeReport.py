@@ -350,7 +350,7 @@ varsContam=[]
 patVarNums={}
 rowNum=0
 # Pathogenic
-ws=wb.sheet_by_name('Pathogenic')
+ws=wb.sheet_by_name('Clinically_significant')
 muts=[]
 for i in range(ws.nrows)[1:]:
     row=ws.row_values(i)
@@ -396,7 +396,7 @@ for i in range(ws.nrows)[1:]:
     cells[9].paragraphs[0].alignment=WD_ALIGN_PARAGRAPH.LEFT
 rowNum=i
 # Predicted pathogenic
-ws=wb.sheet_by_name('Predicted_pathogenic')
+ws=wb.sheet_by_name('Predicted_clin_significant')
 if ws.nrows>1:
     muts=[]
     for i in range(ws.nrows)[1:]:

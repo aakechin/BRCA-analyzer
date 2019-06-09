@@ -47,23 +47,35 @@ for i,d in enumerate(ds):
                 titlesCheck=True
             continue
         cols=string[:-1].split('\t')
-        qual=cols[10]
-        ads=cols[14].split(':')[1].split(',')
+        # If there is no alternative alleles
+        ## or there is strand-bias, continue
+        if cols[12]=='.' or 'SB' in cols[14]:
+            continue
+        qual=cols[13]
+        adColNum=cols[16].split(':').index('AD')
+        dpColNum=cols[16].split(':').index('DP')
+        ads=cols[17].split(':')[adColNum].split(',')
+        dp=cols[17].split(':')[dpColNum]
         adNum=len(ads)
         # If we meet locus with several alleles first time
         if adNum>2:
-            ad=ads[0]+','+ads[adi]
+            # Here we write whole coverage and alt coverage
+            ## But later we will calculate namelt reference coverage
+            ad=dp+','+ads[adi]
             if adi<adNum-1:
                 adi+=1
             elif adi==adNum-1:
                 adi=1
         else:
-            ad=','.join(ads)
-        annm=annp.findall(cols[12])
+            # Here we write whole coverage and alt coverage
+            ## But later we will calculate namelt reference coverage
+            ad=','.join([dp,ads[1]])
+            adi=1
+        annm=annp.findall(cols[15])
         ann=annm[0]
-        pos=cols[6]
-        ref=cols[8]
-        alt=cols[9]
+        pos=cols[9]
+        ref=cols[11]
+        alt=cols[12]
         key='\t'.join(cols[:5])
         if key not in allData.keys():
             allData[key]=[patName,qual,ad,ann,pos,ref,alt]
