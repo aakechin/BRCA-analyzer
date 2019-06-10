@@ -1,6 +1,10 @@
 # This script gets percent of properly trimmed reads
 
-import glob,re,argparse,sys
+import sys
+import re
+import glob
+import argparse
+import pysam
 import subprocess as sp
 
 def showPercWork(done,allWork):
@@ -9,8 +13,8 @@ def showPercWork(done,allWork):
     sys.stdout.flush()
 
 par=argparse.ArgumentParser(description='This script gets percent of properly trimmed reads')
-par.add_argument('--native-reads','-nat',dest='nativeReadsFiles',type=str,help='regular expression for files with native R1 reads (better with Undertermined reads)',required=True)
-par.add_argument('--trimmed-reads','-trim',dest='trimReadsFiles',type=str,help='regular expression for files with trimmed R1 reads. Use this argument, only if have trimmed reads',required=False)
+par.add_argument('--native-reads','-nat',dest='nativeReadsFiles',type=str,help='regular expression for FASTQ- or BAM-files with native R1 reads (better with Undertermined reads)',required=True)
+par.add_argument('--trimmed-reads','-trim',dest='trimReadsFiles',type=str,help='regular expression for FASTQ- or BAM-files with trimmed R1 reads. Use this argument, only if have trimmed reads',required=False)
 par.add_argument('--patients-file','-pat',dest='patFile',type=str,help='file with patients information (Patient_Num, Patient_ID, index1, index2)',required=False)
 par.add_argument('--output-file','-out',dest='outFile',type=str,help='file for output',required=True)
 args=par.parse_args()
@@ -27,9 +31,17 @@ p1=re.compile('(\d+)')
 p2=re.compile('patient_(\d+).r1')
 nump=re.compile('(\d+)')
 ds1=glob.glob(args.nativeReadsFiles)
+if len(ds1)==0:
+    print('ERROR! No files with native reads were chosen:')
+    print(args.nativeReadsFiles)
+    exit(1)
 reads1Num={}
 if args.trimReadsFiles:
     ds2=glob.glob(args.trimReadsFiles)
+    if len(ds2)==0:
+        print('ERROR! No files with trimmed reads were chosen:')
+        print(args.trimReadsFiles)
+        exit(1)
     reads2Num={}
 allWork=len(ds1)
 print('Evaluating number of reads for each sample...')
@@ -42,9 +54,14 @@ for i,d in enumerate(sorted(ds1)):
         dName=d[d.rfind('/')+1:]
         patNum=p1.findall(dName)[0]
         filesPatNums.append(int(patNum))
-    out=sp.check_output('zcat '+d.replace(' ','\ ')+' | wc -l',shell=True,stderr=sp.STDOUT,universal_newlines=True)
-    totalReadsNum=int(nump.findall(out)[0])
-    reads1Num[patNum]=totalReadsNum/2
+    if d[-4:]=='.bam':
+        bamFile=pysam.AlignmentFile(d)
+        totalReadsNum=bamFile.mapped+bamFile.unmapped
+        reads1Num[patNum]=totalReadsNum
+    else:
+        out=sp.check_output('zcat '+d.replace(' ','\ ')+' | wc -l',shell=True,stderr=sp.STDOUT,universal_newlines=True)
+        totalReadsNum=int(nump.findall(out)[0])
+        reads1Num[patNum]=totalReadsNum/2
     showPercWork(i+1,allWork)
 filesPatNums=sorted(filesPatNums)
 ##print(reads1Num)
@@ -57,14 +74,19 @@ if args.trimReadsFiles:
         m2=p2.findall(d)
         if len(m2)==0: patNum=p1.findall(d)[0]
         else: patNum=m2[0]
-        out=sp.check_output('zcat '+d.replace(' ','\ ')+' | wc -l',shell=True,stderr=sp.STDOUT,universal_newlines=True)
-        trimmedReadsNum=int(nump.findall(out)[0])
-        reads2Num[patNum]=trimmedReadsNum/2
+        if d[-4:]=='.bam':
+            bamFile=pysam.AlignmentFile(d)
+            trimmedReadsNum=bamFile.mapped
+            reads2Num[patNum]=trimmedReadsNum
+        else:
+            out=sp.check_output('zcat '+d.replace(' ','\ ')+' | wc -l',shell=True,stderr=sp.STDOUT,universal_newlines=True)
+            trimmedReadsNum=int(nump.findall(out)[0])
+            reads2Num[patNum]=trimmedReadsNum/2
         showPercWork(i+1,allWork)
     print()
 rFile=open(args.outFile,'w')
 if args.trimReadsFiles:
-    rFile.write('\t'.join(['Patient_Num','Patient_ID','Barcode_1','Barcode_2','Total_Reads','Properly_Trimmed','Share_of_Reads'])+'\n')
+    rFile.write('\t'.join(['Patient_Num','Patient_ID','Barcode_1','Barcode_2','Total_Reads (R1+R2)','Properly_Trimmed (R1+R2)','Share_of_Reads'])+'\n')
     for key,item in reads1Num.items():
         if key not in reads2Num and key!='Undetermined':
             perc=0; reads2Num[key]=0
