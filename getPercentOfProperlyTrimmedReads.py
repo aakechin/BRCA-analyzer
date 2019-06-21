@@ -72,7 +72,9 @@ if args.trimReadsFiles:
     showPercWork(0,allWork)
     for i,d in enumerate(sorted(ds2)):
         m2=p2.findall(d)
-        if len(m2)==0: patNum=p1.findall(d)[0]
+        dPart=d[d.rfind('/')+1:]
+        if len(m2)==0:
+            patNum=p1.findall(dPart)[0]
         else: patNum=m2[0]
         if d[-4:]=='.bam':
             bamFile=pysam.AlignmentFile(d)
