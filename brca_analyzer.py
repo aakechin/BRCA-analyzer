@@ -58,12 +58,6 @@ def processPatient(inputArgs):
                                ' SORT_ORDER=coordinate CREATE_INDEX=TRUE RGLB=MiSeq RGPL=Illumina'
                                ' RGPU=barcode RGSM=patient_'+patNum,
                                shell=True,stderr=sp.STDOUT)
-##    # Index BAM-file
-##    if not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+''
-##                          '.sorted.read_groups.bam.bai') and not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+''
-##                          '.sorted.read_groups.bam.bai.gz'):
-##        output=sp.check_output(configs[1]+"samtools index "+outDir+'patient_'+patNum+'/patient_'+patNum+'.sorted.read_groups.bam',
-##                               shell=True,stderr=sp.STDOUT)
     # Create targets for realignment
     if not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+''
                           '.sorted.read_groups.intervals') and not os.path.exists(outDir+'patient_'+patNum+'/patient_'+patNum+''
@@ -499,6 +493,13 @@ if args.readsFilesN:
     else:
         output=sp.check_output('python3 '+thisDir+'getPercentOfProperlyTrimmedReads.py '
                                '-nat "'+args.readsFilesN+'" -trim "'+args.readsFiles1+'" -out '+outDir+args.runName+'.reads_statistics.xls',shell=True,stderr=sp.STDOUT)
+elif args.primersFileR1_5:
+    if args.patientsTable:
+        output=sp.check_output('python3 '+thisDir+'getPercentOfProperlyTrimmedReads.py '
+                               '-nat "'+args.readsFilesN+'" -trim "'+outDir+'patient_*/*.sorted.read_groups.realigned.recal.'+cutPrimers+'bam'+'" -pat '+patientsTable+' -out '+outDir+args.runName+'.reads_statistics.xls',shell=True,stderr=sp.STDOUT)
+    else:
+        output=sp.check_output('python3 '+thisDir+'getPercentOfProperlyTrimmedReads.py '
+                               '-nat "'+args.readsFilesN+'" -trim "'+outDir+'patient_*/*.sorted.read_groups.realigned.recal.'+cutPrimers+'bam'+'" -out '+outDir+args.runName+'.reads_statistics.xls',shell=True,stderr=sp.STDOUT)
 else:
     if args.patientsTable:
         output=sp.check_output('python3 '+thisDir+'getPercentOfProperlyTrimmedReads.py '
