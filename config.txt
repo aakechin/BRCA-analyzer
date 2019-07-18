@@ -5,3 +5,4 @@
 /home/andrey/Downloads/snpEff/
 /home/andrey/Downloads/annovar/
 /home/andrey/projects/brca_analyzer_v0.9/cutPrimers/
+/srv/reference_genomes/human/ucsc.hg19.fasta
