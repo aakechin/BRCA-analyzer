@@ -495,11 +495,22 @@ if args.readsFilesN:
                                '-nat "'+args.readsFilesN+'" -trim "'+args.readsFiles1+'" -out '+outDir+args.runName+'.reads_statistics.xls',shell=True,stderr=sp.STDOUT)
 elif args.primersFileR1_5:
     if args.patientsTable:
-        output=sp.check_output('python3 '+thisDir+'getPercentOfProperlyTrimmedReads.py '
-                               '-nat "'+args.readsFilesN+'" -trim "'+outDir+'patient_*/*.sorted.read_groups.realigned.recal.trimmed.sorted.bam'+'" -pat '+patientsTable+' -out '+outDir+args.runName+'.reads_statistics.xls',shell=True,stderr=sp.STDOUT)
+        output=sp.check_output(' '.join(['python3',
+                                         thisDir+'getPercentOfProperlyTrimmedReads.py',
+                                         '-nat','"'+args.readsFiles1+'"',
+                                         '-trim',
+                                         '"'+outDir+'patient_*/*.sorted.read_groups.realigned.recal.trimmed.sorted.bam'+'"',
+                                         '-pat',args.patientsTable,
+                                         '-out',outDir+args.runName+'.reads_statistics.xls']),
+                               shell=True,stderr=sp.STDOUT)
     else:
-        output=sp.check_output('python3 '+thisDir+'getPercentOfProperlyTrimmedReads.py '
-                               '-nat "'+args.readsFilesN+'" -trim "'+outDir+'patient_*/*.sorted.read_groups.realigned.recal.trimmed.sorted.bam'+'" -out '+outDir+args.runName+'.reads_statistics.xls',shell=True,stderr=sp.STDOUT)
+        output=sp.check_output(' '.join(['python3',
+                                         thisDir+'getPercentOfProperlyTrimmedReads.py',
+                                         '-nat','"'+args.readsFiles1+'"',
+                                         '-trim',
+                                         '"'+outDir+'patient_*/*.sorted.read_groups.realigned.recal.trimmed.sorted.bam'+'"',
+                                         '-out',outDir+args.runName+'.reads_statistics.xls']),
+                               shell=True,stderr=sp.STDOUT)
 else:
     if args.patientsTable:
         output=sp.check_output('python3 '+thisDir+'getPercentOfProperlyTrimmedReads.py '
