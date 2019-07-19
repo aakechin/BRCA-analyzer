@@ -496,10 +496,10 @@ if args.readsFilesN:
 elif args.primersFileR1_5:
     if args.patientsTable:
         output=sp.check_output('python3 '+thisDir+'getPercentOfProperlyTrimmedReads.py '
-                               '-nat "'+args.readsFilesN+'" -trim "'+outDir+'patient_*/*.sorted.read_groups.realigned.recal.'+cutPrimers+'bam'+'" -pat '+patientsTable+' -out '+outDir+args.runName+'.reads_statistics.xls',shell=True,stderr=sp.STDOUT)
+                               '-nat "'+args.readsFilesN+'" -trim "'+outDir+'patient_*/*.sorted.read_groups.realigned.recal.trimmed.sorted.bam'+'" -pat '+patientsTable+' -out '+outDir+args.runName+'.reads_statistics.xls',shell=True,stderr=sp.STDOUT)
     else:
         output=sp.check_output('python3 '+thisDir+'getPercentOfProperlyTrimmedReads.py '
-                               '-nat "'+args.readsFilesN+'" -trim "'+outDir+'patient_*/*.sorted.read_groups.realigned.recal.'+cutPrimers+'bam'+'" -out '+outDir+args.runName+'.reads_statistics.xls',shell=True,stderr=sp.STDOUT)
+                               '-nat "'+args.readsFilesN+'" -trim "'+outDir+'patient_*/*.sorted.read_groups.realigned.recal.trimmed.sorted.bam'+'" -out '+outDir+args.runName+'.reads_statistics.xls',shell=True,stderr=sp.STDOUT)
 else:
     if args.patientsTable:
         output=sp.check_output('python3 '+thisDir+'getPercentOfProperlyTrimmedReads.py '
