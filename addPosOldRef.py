@@ -42,6 +42,8 @@ pats={}
 if args.patientsTable:
     try:
         for string in pFile:
+            if string=='' or string==' ' or string=='\n':
+                continue
             cols=string.replace('\n','').split('\t')
             pats[cols[0]]=[cols[1],cols[2]+'_'+cols[3]]
     except:
