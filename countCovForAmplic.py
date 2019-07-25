@@ -127,7 +127,14 @@ pats={}
 if patFileName:
     pFile=open(patFileName)
     for string in pFile:
-        cols=string[:-1].split('\t')
+        if ('PatientID' in string or
+            'Patient_Num' in string or
+            'Patient_ID' in string or
+            string=='' or
+            string==' ' or
+            string=='\n'):
+            continue
+        cols=string.replace('\n','').replace('\r','').split('\t')
         pats[cols[0]]=[cols[1],cols[2]+'_'+cols[3]]
     pFile.close()
 else:
