@@ -23,7 +23,13 @@ if args.patFile:
     file=open(args.patFile)
     pats={}
     for string in file:
-        if 'PatientID' in string: continue
+        if ('PatientID' in string or
+            'Patient_Num' in string or
+            'Patient_ID' in string or
+            string=='' or
+            string==' ' or
+            string=='\n'):
+            continue
         cols=string.replace('\n','').split('\t')
         pats[cols[0]]=cols[1:4]
 
