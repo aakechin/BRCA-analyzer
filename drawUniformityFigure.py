@@ -41,20 +41,21 @@ for string in file:
     pat=cols[0].replace('patient_','')
     pats.append(pat)
     covs0=list(map(float,cols[5:]))
-    print(covs0)
+##    print(covs0)
     covs=[]
     for i,cov in enumerate(covs0):
         covs.append(cov)
     covList.append(covs)
 data=np.array(covList)
-print(data)
-print(data.shape)
+##print(data)
+##print(data.shape)
 maxi,maxj=data.shape
 meanAmplCovs=[]
 cvs=[]
 for j in range(maxj):
     meanAmplCovs.append(round(float(stat.median(data[:,j])),1))
-    cvs.append(round(float(stat.stdev(data[:,j])/stat.mean(data[:,j])),3))
+    if maxi>1:
+        cvs.append(round(float(stat.stdev(data[:,j])/stat.mean(data[:,j])),3))
 
 x=list(range(1,len(meanAmplCovs)+1))
 fig,ax1=plt.subplots(figsize=(15,4))
@@ -65,17 +66,18 @@ ax1.set_yticklabels(['{:3.0f}'.format(i) for i in ax1.get_yticks()],fontsize=16,
 ax1.set_xticklabels(['{:3.0f}'.format(i) for i in ax1.get_xticks()],fontsize=16,fontweight='normal')
 ax1.set_ylabel(lang['MedAmplCov'],fontsize=16,fontweight='bold')
 ax1.set_xlabel(lang['AmplNum'],fontsize=16,fontweight='bold')
-ax2=ax1.twinx()
-pl2=ax2.plot(x,cvs,'r-',label=lang['VarCoef'])
-y=[0,0.50,1.00,1.50,2.00,2.50]
-ax2.set_yticklabels(['{:3.0f}%'.format(i*100) for i in y],fontsize=16,fontweight='normal')
-ax2.set_xticklabels(['{:3.0f}'.format(i) for i in ax2.get_xticks()],fontsize=16,fontweight='normal')
-ax2.set_ylim([0,2.6])
-ax2.set_xlim(0,190)
-ax2.set_ylabel(lang['VarCoefCovAmpl'],fontsize=16,fontweight='bold')
-plt.title('Coverage Uniformity',fontsize=16,fontweight='bold')
+if maxi>1:
+    ax2=ax1.twinx()
+    pl2=ax2.plot(x,cvs,'r-',label=lang['VarCoef'])
+    y=[0,0.50,1.00,1.50,2.00,2.50]
+    ax2.set_yticklabels(['{:3.0f}%'.format(i*100) for i in y],fontsize=16,fontweight='normal')
+    ax2.set_xticklabels(['{:3.0f}'.format(i) for i in ax2.get_xticks()],fontsize=16,fontweight='normal')
+    ax2.set_ylim([0,2.6])
+    ax2.set_xlim(0,190)
+    ax2.set_ylabel(lang['VarCoefCovAmpl'],fontsize=16,fontweight='bold')
+    plt.title('Coverage Uniformity',fontsize=16,fontweight='bold')
+    ax2.legend(bbox_to_anchor=(0., 0.95, 1., .10),loc=4,fontsize=16)
 ax1.legend(bbox_to_anchor=(0., 0.95, 1., .10),loc=3,fontsize=16)
-ax2.legend(bbox_to_anchor=(0., 0.95, 1., .10),loc=4,fontsize=16)
 plt.tight_layout()
 plt.savefig(args.outFile,bbox_inches='tight')
 plt.close()
