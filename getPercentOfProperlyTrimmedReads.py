@@ -101,6 +101,8 @@ if args.trimReadsFiles:
         elif key=='Undetermined':
             rFile.write('\t'.join([key,'','','',str(reads1Num[key]),'',''])+'\n')
             continue
+        elif reads1Num[key]==0:
+            perc=0
         else:
             perc=reads2Num[key]/reads1Num[key]
         if args.patFile:
