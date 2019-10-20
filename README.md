@@ -103,6 +103,6 @@ python3 ../brca_analyzer.py -r1 'reads_trimmed/patient_*.r1.ad_trimmed.trimmed.q
 ### Opportunity of faster analysis
 If you have several processors (e.g. on the server), each with several cores, you can run the analysis in two steps but several times faster. First, you need to separate all FASTQ-files onto several groups of 4 file pairs (R1 and R2 reads). It can be done with bash-script (if you don't know how, contact me, and I'll send you my script). After that for each group of files you can start the analysis on the different processors with parameter -notjoin that make BRCA-analyzer not to join result files of all samples into one. Second, you need to start analysis with the same parameters, but without -notjoin and with -onlyjoin (as -r1 and -r2 parameters you can choose any group of files). This process can be done on a single processor. But in this case we recommend to create output directory manually in advance.
 ## Citation
-Manuscript is prepared
+Kechin A, Khrapov E, Boyarskikh U, Kel A, Filipenko M. BRCA-analyzer: Automatic workflow for processing NGS reads of BRCA1 and BRCA2 genes. Comput Biol Chem. 2018 Dec;77:297-306. doi: 10.1016/j.compbiolchem.2018.10.012. PMID: 30408727
 ## Keywords
 BRCA1, BRCA2, NGS data analysis, automatic workflow
