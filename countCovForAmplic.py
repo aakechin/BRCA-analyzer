@@ -52,7 +52,7 @@ def countCoverage(bamFile,mpileupFile,chrom=17,start=0,end=0,minMean='mean'):
         return 0
     else:
         if len(covs)<end-start+1:
-            covs.extend([0]*(end-start+1-len(covs))
+            covs.extend([0]*(end-start+1-len(covs)))
         if minMean=='mean': return mean(covs)
         elif minMean=='min': return min(covs)
         elif minMean=='max': return max(covs)
